@@ -87,27 +87,29 @@ const MainLayout = () => {
             
             <div className="flex-1 py-5 px-5 overflow-y-auto">
               <nav className="space-y-2">
-                {menuItems.map((item, idx) => (
-                  <li key={idx}>
-                    <NavLink
-                      to={item.to}
-                      className={({ isActive }) =>
-                        `flex items-center p-3 rounded-lg ${
-                          isActive 
-                            ? 'bg-primary-50 text-primary-700' 
-                            : 'text-gray-700 hover:bg-gray-50'
-                        }`
-                      }
-                    >
-                      <item.icon 
-                        className={({ isActive }: { isActive: boolean }) =>
-                          `h-5 w-5 ${isActive ? 'text-primary-700' : 'text-gray-500'}`
-                        } 
-                      />
-                      <span className="ml-3 text-sm font-medium">{item.text}</span>
-                    </NavLink>
-                  </li>
-                ))}
+                <ul className="list-none m-0 p-0">
+                  {menuItems.map((item, idx) => (
+                    <li key={idx} className="mb-1">
+                      <NavLink
+                        to={item.to}
+                        className={({ isActive }) =>
+                          `flex items-center p-3 rounded-lg ${
+                            isActive 
+                              ? 'bg-primary-50 text-primary-700' 
+                              : 'text-gray-700 hover:bg-gray-50'
+                          }`
+                        }
+                      >
+                        <item.icon 
+                          className={`h-5 w-5 ${
+                            location.pathname === item.to ? 'text-primary-700' : 'text-gray-500'
+                          }`}
+                        />
+                        <span className="ml-3 text-sm font-medium">{item.text}</span>
+                      </NavLink>
+                    </li>
+                  ))}
+                </ul>
               </nav>
             </div>
             
@@ -133,27 +135,29 @@ const MainLayout = () => {
           
           <div className="flex-1 py-5 px-4 overflow-y-auto">
             <nav className="space-y-2">
-              {menuItems.map((item, idx) => (
-                <li key={idx}>
-                  <NavLink
-                    to={item.to}
-                    className={({ isActive }) =>
-                      `flex items-center p-3 rounded-lg ${
-                        isActive 
-                          ? 'bg-primary-50 text-primary-700' 
-                          : 'text-gray-700 hover:bg-gray-50'
-                      }`
-                    }
-                  >
-                    <item.icon 
-                      className={({ isActive }: { isActive: boolean }) =>
-                        `h-5 w-5 ${isActive ? 'text-primary-700' : 'text-gray-500'}`
-                      } 
-                    />
-                    <span className="ml-3 text-sm font-medium">{item.text}</span>
-                  </NavLink>
-                </li>
-              ))}
+              <ul className="list-none m-0 p-0">
+                {menuItems.map((item, idx) => (
+                  <li key={idx} className="mb-1">
+                    <NavLink
+                      to={item.to}
+                      className={({ isActive }) =>
+                        `flex items-center p-3 rounded-lg ${
+                          isActive 
+                            ? 'bg-primary-50 text-primary-700' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`
+                      }
+                    >
+                      <item.icon 
+                        className={`h-5 w-5 ${
+                          location.pathname === item.to ? 'text-primary-700' : 'text-gray-500'
+                        }`}
+                      />
+                      <span className="ml-3 text-sm font-medium">{item.text}</span>
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
             </nav>
           </div>
           
