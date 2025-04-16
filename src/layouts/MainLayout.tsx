@@ -1,4 +1,4 @@
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate, NavLink } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { 
   Bars3Icon, 
@@ -15,7 +15,10 @@ import {
   SparklesIcon,
   UserGroupIcon,
   CubeIcon,
-  MagnifyingGlassCircleIcon
+  MagnifyingGlassCircleIcon,
+  HomeIcon,
+  CogIcon,
+  TagIcon
 } from '@heroicons/react/24/outline';
 
 const MainLayout = () => {
@@ -33,55 +36,16 @@ const MainLayout = () => {
     setSidebarOpen(false);
   }, [location.pathname]);
 
-  const navigation = [
-    { 
-      name: 'Dashboard', 
-      path: '/dashboard', 
-      icon: ChartBarIcon,
-      description: 'Kampanya performansını görüntüleyin'
-    },
-    { 
-      name: 'Hesap Bağlama', 
-      path: '/account-link', 
-      icon: LinkIcon,
-      description: 'Reklam hesaplarınızı yönetin'
-    },
-    { 
-      name: 'Kreatif & Hedef Kitle', 
-      path: '/creatives-audience', 
-      icon: PhotoIcon,
-      description: 'Reklam içeriklerinizi oluşturun'
-    },
-    { 
-      name: 'Analitikler', 
-      path: '/analytics', 
-      icon: ChartPieIcon,
-      description: 'GA4, Meta ve Google Ads verileri'
-    },
-    { 
-      name: 'Insights Hub', 
-      path: '/insights', 
-      icon: SparklesIcon,
-      description: 'Yapay zeka destekli insights'
-    },
-    { 
-      name: 'Kitle Oluşturucu', 
-      path: '/audience-builder', 
-      icon: UserGroupIcon,
-      description: 'Otomatik hedef kitle oluşturun'
-    },
-    { 
-      name: 'Entegrasyonlar', 
-      path: '/integrations', 
-      icon: CubeIcon,
-      description: 'API ve servis bağlantıları'
-    },
-    { 
-      name: 'SEO Audit', 
-      path: '/seo-audit', 
-      icon: MagnifyingGlassCircleIcon,
-      description: 'SEO analizi ve raporları'
-    },
+  const menuItems = [
+    { to: '/dashboard', text: 'Kontrol Paneli', icon: HomeIcon },
+    { to: '/analytics', text: 'Analitik', icon: ChartBarIcon },
+    { to: '/insights', text: 'İçgörüler', icon: SparklesIcon },
+    { to: '/audience-builder', text: 'Hedef Kitle', icon: UserGroupIcon },
+    { to: '/tag-assistant', text: 'Tag Assistant', icon: TagIcon },
+    { to: '/creatives-audience', text: 'Kreatif & Kitle', icon: SparklesIcon },
+    { to: '/integrations', text: 'Entegrasyonlar', icon: LinkIcon },
+    { to: '/seo-audit', text: 'SEO Denetimi', icon: MagnifyingGlassIcon },
+    { to: '/account-link', text: 'Hesap Bağlantıları', icon: CogIcon },
   ];
 
   return (
@@ -123,27 +87,26 @@ const MainLayout = () => {
             
             <div className="flex-1 py-5 px-5 overflow-y-auto">
               <nav className="space-y-2">
-                {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={item.path}
-                    className={`flex items-center p-3 rounded-xl transition-all group ${
-                      location.pathname === item.path
-                        ? 'bg-primary-50 text-primary-600'
-                        : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <item.icon
-                      className={`flex-shrink-0 h-6 w-6 mr-3 ${
-                        location.pathname === item.path ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'
-                      }`}
-                      aria-hidden="true"
-                    />
-                    <div>
-                      <span className="font-medium">{item.name}</span>
-                      <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-                    </div>
-                  </Link>
+                {menuItems.map((item, idx) => (
+                  <li key={idx}>
+                    <NavLink
+                      to={item.to}
+                      className={({ isActive }) =>
+                        `flex items-center p-3 rounded-lg ${
+                          isActive 
+                            ? 'bg-primary-50 text-primary-700' 
+                            : 'text-gray-700 hover:bg-gray-50'
+                        }`
+                      }
+                    >
+                      <item.icon 
+                        className={({ isActive }: { isActive: boolean }) =>
+                          `h-5 w-5 ${isActive ? 'text-primary-700' : 'text-gray-500'}`
+                        } 
+                      />
+                      <span className="ml-3 text-sm font-medium">{item.text}</span>
+                    </NavLink>
+                  </li>
                 ))}
               </nav>
             </div>
@@ -170,27 +133,26 @@ const MainLayout = () => {
           
           <div className="flex-1 py-5 px-4 overflow-y-auto">
             <nav className="space-y-2">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className={`flex items-center p-3 rounded-xl transition-all group ${
-                    location.pathname === item.path
-                      ? 'bg-primary-50 text-primary-600'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <item.icon
-                    className={`flex-shrink-0 h-5 w-5 mr-3 ${
-                      location.pathname === item.path ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-600'
-                    }`}
-                    aria-hidden="true"
-                  />
-                  <div>
-                    <span className="font-medium text-sm">{item.name}</span>
-                    <p className="text-xs text-gray-500 mt-0.5">{item.description}</p>
-                  </div>
-                </Link>
+              {menuItems.map((item, idx) => (
+                <li key={idx}>
+                  <NavLink
+                    to={item.to}
+                    className={({ isActive }) =>
+                      `flex items-center p-3 rounded-lg ${
+                        isActive 
+                          ? 'bg-primary-50 text-primary-700' 
+                          : 'text-gray-700 hover:bg-gray-50'
+                      }`
+                    }
+                  >
+                    <item.icon 
+                      className={({ isActive }: { isActive: boolean }) =>
+                        `h-5 w-5 ${isActive ? 'text-primary-700' : 'text-gray-500'}`
+                      } 
+                    />
+                    <span className="ml-3 text-sm font-medium">{item.text}</span>
+                  </NavLink>
+                </li>
               ))}
             </nav>
           </div>
