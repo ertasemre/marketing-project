@@ -20,7 +20,8 @@ import {
   CogIcon,
   TagIcon,
   MoonIcon,
-  SunIcon
+  SunIcon,
+  EyeIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../hooks/useTheme';
 
@@ -44,6 +45,7 @@ const MainLayout = () => {
     { to: '/dashboard', text: 'Kontrol Paneli', icon: HomeIcon },
     { to: '/analytics', text: 'Analitik', icon: ChartBarIcon },
     { to: '/insights', text: 'İçgörüler', icon: SparklesIcon },
+    { to: '/ux-insights', text: 'UX Insights', icon: EyeIcon },
     { to: '/audience-builder', text: 'Hedef Kitle', icon: UserGroupIcon },
     { to: '/tag-assistant', text: 'Tag Assistant', icon: TagIcon },
     { to: '/creatives-audience', text: 'Kreatif & Kitle', icon: SparklesIcon },

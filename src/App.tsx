@@ -15,6 +15,7 @@ import AudienceBuilder from './pages/AudienceBuilder';
 import IntegrationsCenter from './pages/IntegrationsCenter';
 import SeoAudit from './pages/SeoAudit';
 import TagAssistant from './pages/TagAssistant';
+import UXInsights from './pages/UXInsights';
 
 // Layout
 import MainLayout from './layouts/MainLayout';
@@ -85,6 +86,10 @@ const App = () => {
           <Route 
             path="/seo-audit" 
             element={isAuthenticated ? <SeoAudit /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/ux-insights" 
+            element={isAuthenticated ? <UXInsights /> : <Navigate to="/login" />} 
           />
           <Route 
             path="/tag-assistant" 
