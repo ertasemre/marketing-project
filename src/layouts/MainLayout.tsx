@@ -18,13 +18,17 @@ import {
   MagnifyingGlassCircleIcon,
   HomeIcon,
   CogIcon,
-  TagIcon
+  TagIcon,
+  MoonIcon,
+  SunIcon
 } from '@heroicons/react/24/outline';
+import { useTheme } from '../hooks/useTheme';
 
 const MainLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
     localStorage.removeItem('auth_token');
@@ -49,7 +53,7 @@ const MainLayout = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile sidebar */}
       <div 
         className={`fixed inset-0 z-50 transition-opacity duration-300 ${
@@ -65,14 +69,14 @@ const MainLayout = () => {
         
         {/* Sidebar */}
         <div 
-          className={`fixed inset-y-0 left-0 w-full max-w-xs bg-white shadow-soft-xl transform transition-transform duration-300 ease-in-out ${
+          className={`fixed inset-y-0 left-0 w-full max-w-xs bg-white dark:bg-gray-800 shadow-soft-xl transform transition-transform duration-300 ease-in-out ${
             sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
         >
           <div className="absolute top-5 right-5">
             <button
               type="button"
-              className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              className="flex items-center justify-center h-8 w-8 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
               onClick={() => setSidebarOpen(false)}
             >
               <span className="sr-only">Menüyü Kapat</span>
@@ -81,7 +85,7 @@ const MainLayout = () => {
           </div>
           
           <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100">
+            <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100 dark:border-gray-700">
               <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">MarketingAI</span>
             </div>
             
@@ -95,14 +99,14 @@ const MainLayout = () => {
                         className={({ isActive }) =>
                           `flex items-center p-3 rounded-lg ${
                             isActive 
-                              ? 'bg-primary-50 text-primary-700' 
-                              : 'text-gray-700 hover:bg-gray-50'
+                              ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400' 
+                              : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/30'
                           }`
                         }
                       >
                         <item.icon 
                           className={`h-5 w-5 ${
-                            location.pathname === item.to ? 'text-primary-700' : 'text-gray-500'
+                            location.pathname === item.to ? 'text-primary-700 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'
                           }`}
                         />
                         <span className="ml-3 text-sm font-medium">{item.text}</span>
@@ -113,12 +117,12 @@ const MainLayout = () => {
               </nav>
             </div>
             
-            <div className="flex-shrink-0 p-5 border-t border-gray-100">
+            <div className="flex-shrink-0 p-5 border-t border-gray-100 dark:border-gray-700">
               <button
                 onClick={handleLogout}
-                className="flex items-center w-full p-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+                className="flex items-center w-full p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
               >
-                <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 mr-3" />
+                <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 mr-3" />
                 <span className="font-medium">Çıkış Yap</span>
               </button>
             </div>
@@ -127,9 +131,9 @@ const MainLayout = () => {
       </div>
 
       {/* Static sidebar for desktop */}
-      <div className="hidden md:fixed md:inset-y-0 md:left-0 md:flex md:flex-col md:w-64 md:border-r md:border-gray-200 md:bg-white">
+      <div className="hidden md:fixed md:inset-y-0 md:left-0 md:flex md:flex-col md:w-64 md:border-r md:border-gray-200 md:bg-white dark:md:bg-gray-800 dark:md:border-gray-700">
         <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100">
+          <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100 dark:border-gray-700">
             <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">MarketingAI</span>
           </div>
           
@@ -143,14 +147,14 @@ const MainLayout = () => {
                       className={({ isActive }) =>
                         `flex items-center p-3 rounded-lg ${
                           isActive 
-                            ? 'bg-primary-50 text-primary-700' 
-                            : 'text-gray-700 hover:bg-gray-50'
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400' 
+                            : 'text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-gray-700/30'
                         }`
                       }
                     >
                       <item.icon 
                         className={`h-5 w-5 ${
-                          location.pathname === item.to ? 'text-primary-700' : 'text-gray-500'
+                          location.pathname === item.to ? 'text-primary-700 dark:text-primary-400' : 'text-gray-500 dark:text-gray-400'
                         }`}
                       />
                       <span className="ml-3 text-sm font-medium">{item.text}</span>
@@ -161,12 +165,12 @@ const MainLayout = () => {
             </nav>
           </div>
           
-          <div className="flex-shrink-0 p-4 border-t border-gray-100">
+          <div className="flex-shrink-0 p-4 border-t border-gray-100 dark:border-gray-700">
             <button
               onClick={handleLogout}
-              className="flex items-center w-full p-3 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex items-center w-full p-3 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors"
             >
-              <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 mr-3" />
+              <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 dark:text-gray-500 mr-3" />
               <span className="font-medium text-sm">Çıkış Yap</span>
             </button>
           </div>
@@ -176,13 +180,13 @@ const MainLayout = () => {
       {/* Main content */}
       <div className="md:pl-64 flex flex-col min-h-screen">
         {/* Top header */}
-        <header className="sticky top-0 z-20 flex items-center h-16 bg-white shadow-soft-sm">
+        <header className="sticky top-0 z-20 flex items-center h-16 bg-white dark:bg-gray-800 shadow-soft-sm dark:border-b dark:border-gray-700">
           <div className="px-4 sm:px-6 md:px-8 flex justify-between w-full">
             {/* Left side - Mobile menu button & Search */}
             <div className="flex items-center">
               <button
                 type="button"
-                className="md:hidden -ml-1 flex items-center justify-center h-10 w-10 rounded-md text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="md:hidden -ml-1 flex items-center justify-center h-10 w-10 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 onClick={() => setSidebarOpen(true)}
               >
                 <span className="sr-only">Menüyü Aç</span>
@@ -196,7 +200,7 @@ const MainLayout = () => {
                 <input
                   type="search"
                   placeholder="Ara..."
-                  className="py-2 pl-10 pr-3 block w-full rounded-lg border border-gray-200 text-sm placeholder:text-gray-400 focus:border-primary-500 focus:ring-primary-500"
+                  className="py-2 pl-10 pr-3 block w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-sm placeholder:text-gray-400 dark:placeholder:text-gray-500 text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:ring-primary-500"
                 />
               </div>
             </div>
@@ -205,7 +209,20 @@ const MainLayout = () => {
             <div className="flex items-center space-x-4">
               <button 
                 type="button" 
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                onClick={toggleTheme}
+              >
+                <span className="sr-only">Tema Değiştir</span>
+                {theme === 'dark' ? (
+                  <SunIcon className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  <MoonIcon className="h-5 w-5" aria-hidden="true" />
+                )}
+              </button>
+
+              <button 
+                type="button" 
+                className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <span className="sr-only">Bildirimler</span>
                 <div className="relative">
@@ -216,16 +233,16 @@ const MainLayout = () => {
               
               <button 
                 type="button" 
-                className="p-1.5 rounded-lg text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                className="p-1.5 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <span className="sr-only">Ayarlar</span>
                 <Cog6ToothIcon className="h-6 w-6" aria-hidden="true" />
               </button>
               
-              <div className="border-l border-gray-200 h-6 mx-2"></div>
+              <div className="border-l border-gray-200 dark:border-gray-700 h-6 mx-2"></div>
               
               <button className="flex items-center rounded-full focus:outline-none focus:ring-2 focus:ring-primary-500">
-                <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-medium">
+                <div className="h-8 w-8 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center text-primary-700 dark:text-primary-300 font-medium">
                   EM
                 </div>
               </button>
@@ -234,7 +251,7 @@ const MainLayout = () => {
         </header>
         
         {/* Page content */}
-        <main className="flex-1">
+        <main className="flex-1 dark:bg-gray-900">
           <div className="py-6 px-4 sm:px-6 md:px-8">
             <Outlet />
           </div>
