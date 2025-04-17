@@ -92,7 +92,7 @@ const MainLayout = () => {
           
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100 dark:border-gray-700">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">MarketingAI</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">Lynq.Studio</span>
             </div>
             
             <div className="flex-1 py-5 px-5 overflow-y-auto">
@@ -140,7 +140,7 @@ const MainLayout = () => {
       <div className="hidden md:fixed md:inset-y-0 md:left-0 md:flex md:flex-col md:w-64 md:border-r md:border-gray-200 md:bg-white dark:md:bg-gray-800 dark:md:border-gray-700">
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100 dark:border-gray-700">
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">MarketingAI</span>
+            <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">Lynq.Studio</span>
           </div>
           
           <div className="flex-1 py-5 px-4 overflow-y-auto">
