@@ -17,6 +17,7 @@ import SeoAudit from './pages/SeoAudit';
 import TagAssistant from './pages/TagAssistant';
 import UXInsights from './pages/UXInsights';
 import InfluencerMarketing from './pages/InfluencerMarketing';
+import ECommerceInsights from './pages/ECommerceInsights';
 
 // Layout
 import MainLayout from './layouts/MainLayout';
@@ -99,6 +100,10 @@ const App = () => {
           <Route 
             path="/influencer-marketing" 
             element={isAuthenticated ? <InfluencerMarketing /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/ecommerce-insights" 
+            element={isAuthenticated ? <ECommerceInsights /> : <Navigate to="/login" />} 
           />
         </Route>
         
