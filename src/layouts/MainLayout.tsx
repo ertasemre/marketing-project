@@ -92,7 +92,7 @@ const MainLayout = () => {
           
           <div className="flex flex-col h-full overflow-hidden">
             <div className="flex-shrink-0 py-6 px-5 flex items-center border-b border-gray-100 dark:border-gray-700">
-              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">Lynq.Studio</span>
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 text-transparent bg-clip-text">lynq.studio</span>
             </div>
             
             <div className="flex-1 py-5 px-5 overflow-y-auto">
