@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import {
   CubeIcon,
   PlusIcon,
@@ -19,7 +20,8 @@ import {
   PhoneIcon,
   VideoCameraIcon,
   CalendarIcon,
-  ChatBubbleLeftEllipsisIcon
+  ChatBubbleLeftEllipsisIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 
 // Mock veri
@@ -389,6 +391,7 @@ const AvailableIntegrationCard = ({ integration, onConnect }: AvailableIntegrati
 const IntegrationsCenter = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [integrations] = useState<Integration[]>(mockIntegrations);
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const [showSupportForm, setShowSupportForm] = useState(false);
   const [supportFormData, setSupportFormData] = useState({
     name: '',
@@ -426,6 +429,7 @@ const IntegrationsCenter = () => {
     e.preventDefault();
     // Burada API'ye form verileri gönderilebilir
     alert('Destek talebiniz alındı. En kısa sürede sizinle iletişime geçeceğiz!');
+    setShowSupportModal(false);
     setShowSupportForm(false);
     setSupportFormData({
       name: '',
@@ -435,6 +439,12 @@ const IntegrationsCenter = () => {
       description: '',
       preferredContact: 'email'
     });
+  };
+
+  // Destek kanalını seç
+  const selectSupportChannel = (channel: string) => {
+    alert(`${channel} kanalı üzerinden en kısa sürede sizinle iletişime geçeceğiz.`);
+    setShowSupportModal(false);
   };
 
   // Handler functions
@@ -523,212 +533,286 @@ const IntegrationsCenter = () => {
         </button>
       </div>
 
-      {/* Entegrasyon Destek Alanı */}
-      <div className="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800 rounded-xl shadow-md overflow-hidden">
-        <div className="flex flex-col md:flex-row">
-          {/* Left side - info */}
-          <div className="md:w-1/3 p-6 flex flex-col justify-between">
+      {/* Kompakt Entegrasyon Destek Alanı */}
+      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 shadow-sm">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <QuestionMarkCircleIcon className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3" aria-hidden="true" />
             <div>
-              <div className="flex items-center mb-4">
-                <QuestionMarkCircleIcon className="h-7 w-7 text-blue-600 dark:text-blue-400" aria-hidden="true" />
-                <h2 className="ml-2 text-xl font-semibold text-blue-900 dark:text-blue-300">Entegrasyon Desteği</h2>
-              </div>
-              <p className="text-blue-700 dark:text-blue-400 mb-6">
+              <h2 className="text-lg font-medium text-blue-900 dark:text-blue-300">Entegrasyon Desteği</h2>
+              <p className="text-sm text-blue-700 dark:text-blue-400">
                 Entegrasyonları kurmakta zorluk mu yaşıyorsunuz? Uzman ekibimiz size yardımcı olmak için hazır.
               </p>
-              
-              {!showSupportForm && (
-                <button
-                  onClick={() => setShowSupportForm(true)}
-                  className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  Destek İste
-                </button>
-              )}
-            </div>
-            
-            <div className="mt-6">
-              <p className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-3">Destek Kanalları:</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="flex items-center p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                  <PhoneIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Telefon Desteği</span>
-                </div>
-                <div className="flex items-center p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                  <VideoCameraIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Video Görüşmesi</span>
-                </div>
-                <div className="flex items-center p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                  <CalendarIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Planlı Oturumlar</span>
-                </div>
-                <div className="flex items-center p-2 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-                  <ChatBubbleLeftEllipsisIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-                  <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Canlı Sohbet</span>
-                </div>
-              </div>
             </div>
           </div>
-          
-          {/* Right side - form */}
-          {showSupportForm && (
-            <div className="md:w-2/3 bg-white dark:bg-gray-800 p-6 border-t md:border-t-0 md:border-l border-blue-200 dark:border-blue-800">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Destek Formu</h3>
-                <button 
-                  onClick={() => setShowSupportForm(false)}
-                  className="text-gray-400 hover:text-gray-500"
-                >
-                  <XCircleIcon className="h-5 w-5" />
-                </button>
-              </div>
-              
-              <form onSubmit={handleSupportFormSubmit} className="space-y-5">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Adınız Soyadınız*
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      id="name"
-                      required
-                      value={supportFormData.name}
-                      onChange={handleInputChange}
-                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      E-posta Adresiniz*
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      id="email"
-                      required
-                      value={supportFormData.email}
-                      onChange={handleInputChange}
-                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Telefon Numaranız
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      id="phone"
-                      value={supportFormData.phone}
-                      onChange={handleInputChange}
-                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label htmlFor="integration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Entegrasyon Tipi*
-                    </label>
-                    <select
-                      name="integration"
-                      id="integration"
-                      required
-                      value={supportFormData.integration}
-                      onChange={handleInputChange}
-                      className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    >
-                      <option value="">Entegrasyon seçin</option>
-                      {mockIntegrations.map(integration => (
-                        <option key={integration.id} value={integration.id}>{integration.name}</option>
-                      ))}
-                      <option value="other">Diğer</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Yaşadığınız Sorun veya İhtiyacınız*
-                  </label>
-                  <textarea
-                    name="description"
-                    id="description"
-                    rows={3}
-                    required
-                    value={supportFormData.description}
-                    onChange={handleInputChange}
-                    className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    placeholder="Entegrasyon sürecinde karşılaştığınız sorunları veya ihtiyaçlarınızı anlatın..."
-                  />
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Tercih Ettiğiniz İletişim Yöntemi
-                  </label>
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="flex items-center p-2 border rounded-md border-gray-300 dark:border-gray-600">
-                      <input
-                        id="contact-email"
-                        name="preferredContact"
-                        type="radio"
-                        checked={supportFormData.preferredContact === 'email'}
-                        value="email"
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                      />
-                      <label htmlFor="contact-email" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                        E-posta
-                      </label>
-                    </div>
-                    <div className="flex items-center p-2 border rounded-md border-gray-300 dark:border-gray-600">
-                      <input
-                        id="contact-phone"
-                        name="preferredContact"
-                        type="radio"
-                        checked={supportFormData.preferredContact === 'phone'}
-                        value="phone"
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                      />
-                      <label htmlFor="contact-phone" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                        Telefon
-                      </label>
-                    </div>
-                    <div className="flex items-center p-2 border rounded-md border-gray-300 dark:border-gray-600">
-                      <input
-                        id="contact-video"
-                        name="preferredContact"
-                        type="radio"
-                        checked={supportFormData.preferredContact === 'video'}
-                        value="video"
-                        onChange={handleInputChange}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
-                      />
-                      <label htmlFor="contact-video" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                        Video
-                      </label>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  >
-                    Destek Talebi Gönder
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
+          <button
+            onClick={() => setShowSupportModal(true)}
+            className="ml-4 px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Destek İste
+          </button>
         </div>
       </div>
+
+      {/* Destek Modal */}
+      <Transition.Root show={showSupportModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={setShowSupportModal}>
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 text-left shadow-xl transition-all sm:my-8 w-full sm:max-w-lg">
+                  <div className="absolute top-0 right-0 pt-4 pr-4">
+                    <button
+                      type="button"
+                      className="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 focus:outline-none"
+                      onClick={() => setShowSupportModal(false)}
+                    >
+                      <span className="sr-only">Kapat</span>
+                      <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                    </button>
+                  </div>
+                  
+                  <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6">
+                    <div className="sm:flex sm:items-start">
+                      <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 sm:mx-0 sm:h-10 sm:w-10">
+                        <QuestionMarkCircleIcon className="h-6 w-6 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+                      </div>
+                      <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                        <Dialog.Title as="h3" className="text-xl font-semibold leading-6 text-gray-900 dark:text-white">
+                          Entegrasyon Desteği
+                        </Dialog.Title>
+                        <div className="mt-2">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Tercih ettiğiniz destek kanalını seçin veya bir destek formu gönderin.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {!showSupportForm ? (
+                      <div className="mt-6">
+                        <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Destek Kanalları:</h4>
+                        <div className="grid grid-cols-2 gap-3 mb-6">
+                          <button
+                            onClick={() => selectSupportChannel('Telefon Desteği')}
+                            className="flex items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                          >
+                            <PhoneIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Telefon Desteği</span>
+                          </button>
+                          <button
+                            onClick={() => selectSupportChannel('Video Görüşmesi')}
+                            className="flex items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                          >
+                            <VideoCameraIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Video Görüşmesi</span>
+                          </button>
+                          <button
+                            onClick={() => selectSupportChannel('Planlı Oturumlar')}
+                            className="flex items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                          >
+                            <CalendarIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Planlı Oturumlar</span>
+                          </button>
+                          <button
+                            onClick={() => selectSupportChannel('Canlı Sohbet')}
+                            className="flex items-center p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                          >
+                            <ChatBubbleLeftEllipsisIcon className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+                            <span className="ml-2 text-sm text-gray-600 dark:text-gray-300">Canlı Sohbet</span>
+                          </button>
+                        </div>
+                        
+                        <div className="text-center">
+                          <span className="inline-block w-full h-px bg-gray-200 dark:bg-gray-700 mb-4"></span>
+                          <button
+                            onClick={() => setShowSupportForm(true)}
+                            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                          >
+                            Form ile Destek Talebi Oluştur
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="mt-6">
+                        <form onSubmit={handleSupportFormSubmit} className="space-y-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label htmlFor="name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Adınız Soyadınız*
+                              </label>
+                              <input
+                                type="text"
+                                name="name"
+                                id="name"
+                                required
+                                value={supportFormData.name}
+                                onChange={handleInputChange}
+                                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                E-posta Adresiniz*
+                              </label>
+                              <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                required
+                                value={supportFormData.email}
+                                onChange={handleInputChange}
+                                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Telefon Numaranız
+                              </label>
+                              <input
+                                type="tel"
+                                name="phone"
+                                id="phone"
+                                value={supportFormData.phone}
+                                onChange={handleInputChange}
+                                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              />
+                            </div>
+                            
+                            <div>
+                              <label htmlFor="integration" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                Entegrasyon Tipi*
+                              </label>
+                              <select
+                                name="integration"
+                                id="integration"
+                                required
+                                value={supportFormData.integration}
+                                onChange={handleInputChange}
+                                className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              >
+                                <option value="">Entegrasyon seçin</option>
+                                {mockIntegrations.map(integration => (
+                                  <option key={integration.id} value={integration.id}>{integration.name}</option>
+                                ))}
+                                <option value="other">Diğer</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div>
+                            <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                              Yaşadığınız Sorun veya İhtiyacınız*
+                            </label>
+                            <textarea
+                              name="description"
+                              id="description"
+                              rows={3}
+                              required
+                              value={supportFormData.description}
+                              onChange={handleInputChange}
+                              className="block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              placeholder="Entegrasyon sürecinde karşılaştığınız sorunları veya ihtiyaçlarınızı anlatın..."
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Tercih Ettiğiniz İletişim Yöntemi
+                            </label>
+                            <div className="grid grid-cols-3 gap-3">
+                              <div className="flex items-center p-2 border rounded-md border-gray-300 dark:border-gray-600">
+                                <input
+                                  id="contact-email"
+                                  name="preferredContact"
+                                  type="radio"
+                                  checked={supportFormData.preferredContact === 'email'}
+                                  value="email"
+                                  onChange={handleInputChange}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                                />
+                                <label htmlFor="contact-email" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                  E-posta
+                                </label>
+                              </div>
+                              <div className="flex items-center p-2 border rounded-md border-gray-300 dark:border-gray-600">
+                                <input
+                                  id="contact-phone"
+                                  name="preferredContact"
+                                  type="radio"
+                                  checked={supportFormData.preferredContact === 'phone'}
+                                  value="phone"
+                                  onChange={handleInputChange}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                                />
+                                <label htmlFor="contact-phone" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                  Telefon
+                                </label>
+                              </div>
+                              <div className="flex items-center p-2 border rounded-md border-gray-300 dark:border-gray-600">
+                                <input
+                                  id="contact-video"
+                                  name="preferredContact"
+                                  type="radio"
+                                  checked={supportFormData.preferredContact === 'video'}
+                                  value="video"
+                                  onChange={handleInputChange}
+                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600"
+                                />
+                                <label htmlFor="contact-video" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                  Video
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex justify-end space-x-3 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => setShowSupportForm(false)}
+                              className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                            >
+                              Geri
+                            </button>
+                            <button
+                              type="submit"
+                              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                              Destek Talebi Gönder
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    )}
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
 
       {/* Kategoriler */}
       <div className="bg-white rounded-xl shadow-soft-sm p-1 flex overflow-x-auto">
