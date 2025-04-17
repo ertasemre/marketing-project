@@ -16,6 +16,7 @@ import IntegrationsCenter from './pages/IntegrationsCenter';
 import SeoAudit from './pages/SeoAudit';
 import TagAssistant from './pages/TagAssistant';
 import UXInsights from './pages/UXInsights';
+import InfluencerMarketing from './pages/InfluencerMarketing';
 
 // Layout
 import MainLayout from './layouts/MainLayout';
@@ -94,6 +95,10 @@ const App = () => {
           <Route 
             path="/tag-assistant" 
             element={isAuthenticated ? <TagAssistant /> : <Navigate to="/login" />} 
+          />
+          <Route 
+            path="/influencer-marketing" 
+            element={isAuthenticated ? <InfluencerMarketing /> : <Navigate to="/login" />} 
           />
         </Route>
         

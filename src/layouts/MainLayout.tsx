@@ -21,7 +21,8 @@ import {
   TagIcon,
   MoonIcon,
   SunIcon,
-  EyeIcon
+  EyeIcon,
+  UserCircleIcon
 } from '@heroicons/react/24/outline';
 import { useTheme } from '../hooks/useTheme';
 
@@ -46,6 +47,7 @@ const MainLayout = () => {
     { to: '/analytics', text: 'Analitik', icon: ChartBarIcon },
     { to: '/insights', text: 'İçgörüler', icon: SparklesIcon },
     { to: '/ux-insights', text: 'UX Insights', icon: EyeIcon },
+    { to: '/influencer-marketing', text: 'Influencer Marketing', icon: UserCircleIcon },
     { to: '/audience-builder', text: 'Hedef Kitle', icon: UserGroupIcon },
     { to: '/tag-assistant', text: 'Tag Assistant', icon: TagIcon },
     { to: '/creatives-audience', text: 'Kreatif & Kitle', icon: SparklesIcon },
