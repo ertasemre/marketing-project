@@ -387,7 +387,8 @@ const AvailableIntegrationCard = ({ integration, onConnect }: AvailableIntegrati
 };
 
 const IntegrationsCenter = () => {
-  const [activeCategory, setActiveCategory] = useState<'all' | 'analytics' | 'ecommerce' | 'marketing' | 'communication'>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [integrations] = useState<Integration[]>(mockIntegrations);
   const [showSupportForm, setShowSupportForm] = useState(false);
   const [supportFormData, setSupportFormData] = useState({
     name: '',
@@ -397,88 +398,20 @@ const IntegrationsCenter = () => {
     description: '',
     preferredContact: 'email'
   });
-
-  // Örnek entegrasyonlar
-  const integrations: IntegrationCard[] = [
-    {
-      id: 'ga4',
-      title: 'Google Analytics 4',
-      description: 'Web sitesi ve uygulama analitik verilerini takip edin',
-      icon: ChartBarIcon,
-      connected: true,
-      category: 'analytics',
-      popular: true
-    },
-    {
-      id: 'gtm',
-      title: 'Google Tag Manager',
-      description: 'Tüm etiketlerinizi tek bir yerden yönetin',
-      icon: TagIcon,
-      connected: true,
-      category: 'analytics',
-      popular: true
-    },
-    {
-      id: 'fb-pixel',
-      title: 'Facebook Pixel',
-      description: 'Facebook reklamlarınızın performansını ölçün',
-      icon: ChartBarIcon,
-      connected: false,
-      category: 'marketing',
-      popular: true
-    },
-    {
-      id: 'shopify',
-      title: 'Shopify',
-      description: 'E-ticaret mağazanızı entegre edin',
-      icon: ShoppingCartIcon,
-      connected: false,
-      category: 'ecommerce',
-      popular: true
-    },
-    {
-      id: 'woo',
-      title: 'WooCommerce',
-      description: 'WordPress e-ticaret platformunu entegre edin',
-      icon: ShoppingCartIcon,
-      connected: false,
-      category: 'ecommerce',
-      popular: false
-    },
-    {
-      id: 'mailchimp',
-      title: 'Mailchimp',
-      description: 'E-posta pazarlama kampanyalarınızı yönetin',
-      icon: EnvelopeIcon,
-      connected: true,
-      category: 'marketing',
-      popular: false
-    },
-    {
-      id: 'intercom',
-      title: 'Intercom',
-      description: 'Müşteri mesajlaşma platformunu entegre edin',
-      icon: ChatBubbleLeftRightIcon,
-      connected: false,
-      category: 'communication',
-      popular: false
-    },
-    {
-      id: 'twilio',
-      title: 'Twilio',
-      description: 'SMS ve telefon entegrasyonlarını yönetin',
-      icon: DevicePhoneMobileIcon,
-      connected: false,
-      category: 'communication',
-      popular: false
-    }
-  ];
-
-  // Filtrelenmiş entegrasyonlar
-  const filteredIntegrations = activeCategory === 'all' 
+   
+  const connectedIntegrations = integrations.filter(
+    integration => integration.status === 'connected'
+  );
+   
+  // Filter integrations based on selected category
+  const filteredIntegrations = selectedCategory === 'all' 
     ? integrations 
-    : integrations.filter(integration => integration.category === activeCategory);
-
+    : integrations.filter(integration => integration.type === selectedCategory);
+   
+  const filteredAvailableIntegrations = selectedCategory === 'all'
+    ? availableIntegrations
+    : availableIntegrations.filter(integration => integration.type === selectedCategory);
+   
   // Form verilerini güncelle
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -504,22 +437,90 @@ const IntegrationsCenter = () => {
     });
   };
 
+  // Handler functions
+  const handleConnect = (id: string) => {
+    console.log(`Connecting to ${id}`);
+    // Implement connection logic here
+  };
+   
+  const handleRefresh = (id: string) => {
+    console.log(`Refreshing data for ${id}`);
+    // Implement refresh logic here
+  };
+   
+  const handleDisconnect = (id: string) => {
+    console.log(`Disconnecting ${id}`);
+    // Implement disconnect logic here
+  };
+   
+  const handleReconnect = (id: string) => {
+    console.log(`Reconnecting ${id}`);
+    // Implement reconnect logic here
+  };
+   
+  // Render connected integrations
+  const renderConnectedIntegrations = () => {
+    if (filteredIntegrations.length === 0) {
+      return (
+        <div className="text-center py-10">
+          <p className="text-gray-500">Bu kategoride bağlı entegrasyon bulunamadı.</p>
+        </div>
+      );
+    }
+     
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredIntegrations.map((integration: Integration) => (
+          <IntegrationCard
+            key={integration.id}
+            integration={integration}
+            onRefresh={handleRefresh}
+            onDisconnect={handleDisconnect}
+            onReconnect={handleReconnect}
+          />
+        ))}
+      </div>
+    );
+  };
+   
+  // Render available integrations
+  const renderAvailableIntegrations = () => {
+    if (filteredAvailableIntegrations.length === 0) {
+      return (
+        <div className="text-center py-10">
+          <p className="text-gray-500">Bu kategoride kullanılabilir entegrasyon bulunamadı.</p>
+        </div>
+      );
+    }
+     
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredAvailableIntegrations.map((integration) => (
+          <AvailableIntegrationCard
+            key={integration.id}
+            integration={integration}
+            onConnect={handleConnect}
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-8">
-      {/* Başlık */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Entegrasyonlar</h1>
-        
-        <div className="flex space-x-3">
-          <button className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-            <PlusCircleIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-            Entegrasyon Ekle
-          </button>
-          <button className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
-            <ArrowPathIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-            Yenile
-          </button>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center space-x-2">
+          <CubeIcon className="h-6 w-6 text-primary-600" />
+          <h1 className="text-2xl font-bold">Entegrasyon Merkezi</h1>
         </div>
+          
+        <button
+          onClick={() => {}}
+          className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"
+        >
+          <PlusIcon className="h-4 w-4 mr-2" />
+          Yeni Entegrasyon Ekle
+        </button>
       </div>
 
       {/* Entegrasyon Destek Alanı */}
@@ -604,8 +605,8 @@ const IntegrationsCenter = () => {
                         className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                       >
                         <option value="">Entegrasyon seçin</option>
-                        {integrations.map(integration => (
-                          <option key={integration.id} value={integration.id}>{integration.title}</option>
+                        {mockIntegrations.map(integration => (
+                          <option key={integration.id} value={integration.id}>{integration.name}</option>
                         ))}
                         <option value="other">Diğer</option>
                       </select>
@@ -736,138 +737,90 @@ const IntegrationsCenter = () => {
       </div>
 
       {/* Kategoriler */}
-      <div className="border-b border-gray-200 dark:border-gray-700">
-        <nav className="flex space-x-8">
+      <div className="bg-white rounded-xl shadow-soft-sm p-1 flex overflow-x-auto">
+        {integrationCategories.map((category) => (
           <button
-            onClick={() => setActiveCategory('all')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeCategory === 'all'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            key={category.id}
+            onClick={() => setSelectedCategory(category.id)}
+            className={`flex-shrink-0 flex items-center px-4 py-2 text-sm font-medium rounded-lg ${
+              selectedCategory === category.id
+                ? 'bg-primary-50 text-primary-700'
+                : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
-            Tümü
+            <category.icon className="h-4 w-4 mr-2" />
+            {category.label}
           </button>
-          <button
-            onClick={() => setActiveCategory('analytics')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeCategory === 'analytics'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            Analitik
-          </button>
-          <button
-            onClick={() => setActiveCategory('ecommerce')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeCategory === 'ecommerce'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            E-Ticaret
-          </button>
-          <button
-            onClick={() => setActiveCategory('marketing')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeCategory === 'marketing'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            Pazarlama
-          </button>
-          <button
-            onClick={() => setActiveCategory('communication')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              activeCategory === 'communication'
-                ? 'border-primary-500 text-primary-600 dark:text-primary-400'
-                : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            İletişim
-          </button>
-        </nav>
-      </div>
-
-      {/* Entegrasyonlar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredIntegrations.map((integration) => (
-          <div
-            key={integration.id}
-            className="bg-white dark:bg-gray-800 overflow-hidden rounded-xl border border-gray-200 dark:border-gray-700 transition-all hover:shadow-md"
-          >
-            <div className="p-6">
-              <div className="flex items-start">
-                <div className="flex-shrink-0 bg-gray-100 dark:bg-gray-700 p-3 rounded-lg">
-                  <integration.icon className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-                </div>
-                <div className="ml-4 flex-1">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-medium text-gray-900 dark:text-white">{integration.title}</h3>
-                    {integration.popular && (
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800 dark:bg-primary-900/30 dark:text-primary-300">
-                        Popüler
-                      </span>
-                    )}
-                  </div>
-                  <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{integration.description}</p>
-                </div>
-              </div>
-              
-              <div className="mt-6 flex items-center justify-between">
-                {integration.connected ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300">
-                    Bağlı
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                    Bağlı Değil
-                  </span>
-                )}
-                
-                <button 
-                  className={`inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded ${
-                    integration.connected
-                      ? 'text-gray-700 bg-gray-100 hover:bg-gray-200 dark:text-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600'
-                      : 'text-primary-700 bg-primary-100 hover:bg-primary-200 dark:text-primary-300 dark:bg-primary-900/30 dark:hover:bg-primary-900/50'
-                  }`}
-                >
-                  {integration.connected ? 'Yönet' : 'Bağlan'}
-                </button>
-              </div>
-            </div>
-          </div>
         ))}
       </div>
 
-      {/* Entegrasyon Yardım Bölümü */}
-      <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 shadow-sm">
-        <div className="flex items-start">
-          <div className="flex-shrink-0">
-            <ExclamationTriangleIcon className="h-6 w-6 text-yellow-500" aria-hidden="true" />
+      {/* İstatistikler */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl shadow-soft p-4 flex items-center">
+          <div className="bg-primary-50 p-3 rounded-lg">
+            <CubeIcon className="h-6 w-6 text-primary-600" />
           </div>
-          <div className="ml-3">
-            <h3 className="text-sm font-medium text-yellow-800 dark:text-yellow-300">Entegrasyon Yardımı</h3>
-            <div className="mt-2 text-sm text-yellow-700 dark:text-yellow-400">
-              <p>
-                Entegrasyonları kurmak için yardıma mı ihtiyacınız var? Detaylı rehberlerimize göz atın veya destek ekibimizle iletişime geçin.
-              </p>
-              <ul className="list-disc pl-5 space-y-1 mt-2">
-                <li>
-                  <a href="#" className="hover:text-yellow-600 dark:hover:text-yellow-200">Google Analytics 4 Entegrasyon Rehberi</a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-yellow-600 dark:hover:text-yellow-200">Facebook Pixel Kurulum Kılavuzu</a>
-                </li>
-                <li>
-                  <a href="#" className="hover:text-yellow-600 dark:hover:text-yellow-200">E-Ticaret Platformu Bağlantı Adımları</a>
-                </li>
-              </ul>
-            </div>
+          <div className="ml-4">
+            <h3 className="text-xl font-semibold">{integrations.length}</h3>
+            <p className="text-sm text-gray-500">Toplam Entegrasyon</p>
           </div>
         </div>
+          
+        <div className="bg-white rounded-xl shadow-soft p-4 flex items-center">
+          <div className="bg-success-50 p-3 rounded-lg">
+            <CheckCircleIcon className="h-6 w-6 text-success-600" />
+          </div>
+          <div className="ml-4">
+            <h3 className="text-xl font-semibold">
+              {connectedIntegrations.length}
+            </h3>
+            <p className="text-sm text-gray-500">Aktif Bağlantı</p>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-soft p-4 flex items-center">
+          <div className="bg-error-50 p-3 rounded-lg">
+            <ExclamationTriangleIcon className="h-6 w-6 text-error-600" />
+          </div>
+          <div className="ml-4">
+            <h3 className="text-xl font-semibold">
+              {integrations.filter(i => i.status === 'error').length}
+            </h3>
+            <p className="text-sm text-gray-500">Bağlantı Hatası</p>
+          </div>
+        </div>
+      </div>
+       
+      {/* Entegrasyonlar Listesi */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Mevcut Entegrasyonlar</h2>
+         
+        {renderConnectedIntegrations()}
+         
+        {filteredIntegrations.length === 0 && (
+          <div className="bg-white rounded-xl shadow-soft p-8 text-center">
+            <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <CubeIcon className="h-8 w-8 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900">Entegrasyon Bulunamadı</h3>
+            <p className="mt-2 text-gray-500">
+              Seçilen kategoride entegrasyon bulunmuyor. Başka bir kategori seçin veya yeni bir entegrasyon ekleyin.
+            </p>
+            <button
+              onClick={() => setSelectedCategory('all')}
+              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-primary-50 hover:bg-primary-100"
+            >
+              Tüm Entegrasyonları Göster
+            </button>
+          </div>
+        )}
+      </div>
+       
+      {/* Kullanılabilir Entegrasyonlar */}
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Kullanılabilir Entegrasyonlar</h2>
+         
+        {renderAvailableIntegrations()}
       </div>
     </div>
   );
