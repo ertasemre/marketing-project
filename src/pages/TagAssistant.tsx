@@ -5,22 +5,49 @@ import {
   QuestionMarkCircleIcon,
   ArrowPathIcon,
   ChevronDownIcon,
-  ChevronUpIcon
+  ChevronUpIcon,
+  InformationCircleIcon,
+  DocumentDuplicateIcon,
+  ArrowTopRightOnSquareIcon
 } from '@heroicons/react/24/outline';
 
 // Analiz sonuçları için tip tanımlamaları
 type StatusType = 'success' | 'warning' | 'error' | 'pending';
+type IntegrationType = 'pixel' | 'api' | 'gtm' | 'code' | 'other';
+type TechnicalLevel = 'basic' | 'intermediate' | 'advanced';
+
+interface EventParam {
+  name: string;
+  found: boolean;
+  required: boolean;
+  value?: string;
+  example?: string;
+  description?: string;
+}
 
 interface EventCheck {
   name: string;
   found: boolean;
   status: StatusType;
   description: string;
+  importance: 'critical' | 'recommended' | 'optional';
+  parameters?: EventParam[];
+  technicalDetails?: string;
+  lastTriggered?: string;
+  frequency?: number; // 24 saat içinde kaç kez
+  firstDetected?: string;
+  whyImportant?: string;
+  howToFix?: string;
 }
 
 interface GA4Check {
   notSetPercentage: number;
   hasEcommerce: boolean;
+  healthScore: number; // Yüzde olarak
+  integrationType: IntegrationType;
+  connected: boolean;
+  propertyId?: string;
+  measurementId?: string;
   ecommerceEvents: EventCheck[];
   events: EventCheck[];
   status: StatusType;
@@ -33,6 +60,11 @@ interface AdsCheck {
   conversionTracking: boolean;
   remarketing: boolean;
   status: StatusType;
+  healthScore: number;
+  integrationType: IntegrationType;
+  conversionIds?: string[];
+  linkedWithGA4?: boolean;
+  enhancedConversions?: boolean;
   issues: string[];
   recommendations: string[];
 }
@@ -41,6 +73,11 @@ interface MetaCheck {
   pixelDetected: boolean;
   conversionAPI: boolean;
   status: StatusType;
+  healthScore: number;
+  integrationType: IntegrationType;
+  connected: boolean;
+  pixelId?: string;
+  advancedMatching?: boolean;
   events: EventCheck[];
   issues: string[];
   recommendations: string[];
@@ -67,30 +104,82 @@ const mockTagAssistantData: TagAssistantData = {
   ga4: {
     notSetPercentage: 8.4,
     hasEcommerce: true,
+    healthScore: 72,
+    integrationType: 'gtm',
+    connected: true,
+    propertyId: 'G-ABC123XYZ',
+    measurementId: 'G-ABC123XYZ',
     ecommerceEvents: [
       { 
         name: 'view_item', 
         found: true, 
         status: 'success',
-        description: 'Ürün görüntüleme olayı doğru şekilde yapılandırılmış.' 
+        description: 'Ürün görüntüleme olayı doğru şekilde yapılandırılmış.',
+        importance: 'recommended',
+        lastTriggered: '2 saat önce',
+        frequency: 152,
+        firstDetected: '14 gün önce',
+        whyImportant: 'Ürün sayfalarında hangi ürünlerin görüntülendiğini ölçer. Bu, kullanıcıların hangi ürünlere ilgi gösterdiğini anlamanıza yardımcı olur.',
+        howToFix: 'Bu olay zaten doğru şekilde çalışıyor.',
+        parameters: [
+          { name: 'item_id', found: true, required: true, value: 'ID-12345' },
+          { name: 'item_name', found: true, required: true, value: 'Örnek Ürün' },
+          { name: 'currency', found: true, required: true, value: 'TRY' },
+          { name: 'value', found: true, required: true, value: '149.99' }
+        ]
       },
       { 
         name: 'add_to_cart', 
         found: true, 
         status: 'success',
-        description: 'Sepete ekleme olayı doğru şekilde yapılandırılmış.' 
+        description: 'Sepete ekleme olayı doğru şekilde yapılandırılmış.',
+        importance: 'critical',
+        lastTriggered: '1 saat önce',
+        frequency: 78,
+        firstDetected: '14 gün önce',
+        whyImportant: 'Kullanıcıların sepete ekledikleri ürünleri takip eder. Bu, dönüşüm hunisindeki ilk adımdır ve sepet terki analizi için kritik öneme sahiptir.',
+        howToFix: 'Bu olay zaten doğru şekilde çalışıyor.',
+        parameters: [
+          { name: 'item_id', found: true, required: true, value: 'ID-12345' },
+          { name: 'item_name', found: true, required: true, value: 'Örnek Ürün' },
+          { name: 'currency', found: true, required: true, value: 'TRY' },
+          { name: 'value', found: true, required: true, value: '149.99' }
+        ]
       },
       { 
         name: 'begin_checkout', 
         found: true, 
         status: 'warning',
-        description: 'Ödeme başlatma olayı bulunuyor ancak eksik parametreler var.' 
+        description: 'Ödeme başlatma olayı bulunuyor ancak eksik parametreler var.',
+        importance: 'critical',
+        lastTriggered: '3 saat önce',
+        frequency: 42,
+        firstDetected: '14 gün önce',
+        whyImportant: 'Ödeme sürecinin başlatıldığını belirtir. Bu, dönüşüm hunisindeki kritik bir adımdır ve ödeme süreci optimizasyonu için önemlidir.',
+        howToFix: 'value ve currency parametrelerini eklemeniz gerekiyor. Bunlar, ödeme sürecinin değerini ölçmek için önemlidir.',
+        parameters: [
+          { name: 'items', found: true, required: true },
+          { name: 'value', found: false, required: true, example: '149.99' },
+          { name: 'currency', found: false, required: true, example: 'TRY' }
+        ]
       },
       { 
         name: 'purchase', 
         found: true, 
         status: 'error',
-        description: 'Satın alma olayında transaction_id parametresi eksik.' 
+        description: 'Satın alma olayında transaction_id parametresi eksik.',
+        importance: 'critical',
+        lastTriggered: '5 saat önce',
+        frequency: 12,
+        firstDetected: '14 gün önce',
+        whyImportant: 'Tamamlanan satın almaları ölçer. Bu, gelir ve dönüşüm takibi için en kritik olaydır. Tüm pazarlama kanallarınızın performansını değerlendirmek için gereklidir.',
+        howToFix: 'transaction_id parametresi eklenmelidir. Bu, her satın alma işlemini benzersiz şekilde tanımlar ve çift sayımı önler. Her sipariş için benzersiz bir değer olmalıdır.',
+        parameters: [
+          { name: 'transaction_id', found: false, required: true, example: 'T-12345' },
+          { name: 'value', found: true, required: true, value: '149.99' },
+          { name: 'currency', found: true, required: true, value: 'TRY' },
+          { name: 'items', found: true, required: true }
+        ]
       }
     ],
     events: [
@@ -98,19 +187,34 @@ const mockTagAssistantData: TagAssistantData = {
         name: 'page_view', 
         found: true, 
         status: 'success',
-        description: 'Sayfa görüntüleme olayı doğru şekilde yapılandırılmış.' 
+        description: 'Sayfa görüntüleme olayı doğru şekilde yapılandırılmış.',
+        importance: 'critical',
+        lastTriggered: '1 dakika önce',
+        frequency: 1254,
+        firstDetected: '30 gün önce',
+        whyImportant: 'Kullanıcıların hangi sayfaları ziyaret ettiğini ölçer. Bu, site trafiğinizi anlamak için temel bir ölçümdür.',
+        howToFix: 'Bu olay zaten doğru şekilde çalışıyor.'
       },
       { 
         name: 'user_engagement', 
         found: true, 
         status: 'success',
-        description: 'Kullanıcı etkileşimi olayı doğru şekilde yapılandırılmış.' 
+        description: 'Kullanıcı etkileşimi olayı doğru şekilde yapılandırılmış.',
+        importance: 'recommended',
+        lastTriggered: '2 dakika önce',
+        frequency: 980,
+        firstDetected: '30 gün önce',
+        whyImportant: 'Kullanıcının sayfada geçirdiği aktif zamanı ölçer. Bu, içeriğinizin ne kadar ilgi çekici olduğunu anlamanıza yardımcı olur.',
+        howToFix: 'Bu olay zaten doğru şekilde çalışıyor.'
       },
       { 
         name: 'scroll', 
         found: false, 
         status: 'warning',
-        description: 'Sayfa kaydırma olayı bulunamadı. Kullanıcı davranışını daha iyi anlamak için eklenebilir.' 
+        description: 'Sayfa kaydırma olayı bulunamadı. Kullanıcı davranışını daha iyi anlamak için eklenebilir.',
+        importance: 'optional',
+        whyImportant: 'Kullanıcıların sayfayı ne kadar aşağı kaydırdığını ölçer. Bu, içeriğinizin ne kadarının görüntülendiğini anlamanızı sağlar.',
+        howToFix: 'GTM üzerinden Enhanced Measurement özelliğini etkinleştirin veya özel bir scroll event\'i tanımlayın.'
       }
     ],
     status: 'warning',
@@ -130,54 +234,105 @@ const mockTagAssistantData: TagAssistantData = {
     conversionTracking: true,
     remarketing: false,
     status: 'warning',
+    healthScore: 65,
+    integrationType: 'gtm',
+    conversionIds: ['AW-123456789'],
+    linkedWithGA4: true,
+    enhancedConversions: false,
     issues: [
       'Yeniden pazarlama etiketi aktif değil veya doğru yapılandırılmamış.',
       'Dönüşüm izleme etkinleştirilmiş ancak bazı ürün kategorilerinde eksik.'
     ],
     recommendations: [
       'Google Ads remarketing tag\'ini etkinleştirin ve tüm sayfalarda çalıştığından emin olun.',
-      'Tüm ürün kategorileri için dönüşüm izleme kurallarını kontrol edin.'
+      'Tüm ürün kategorileri için dönüşüm izleme kurallarını kontrol edin.',
+      'Gelişmiş dönüşüm özelliğini (Enhanced Conversions) etkinleştirerek ölçüm doğruluğunu artırın.'
     ]
   },
   meta: {
     pixelDetected: true,
     conversionAPI: false,
     status: 'error',
+    healthScore: 45,
+    integrationType: 'pixel',
+    connected: true,
+    pixelId: '123456789012345',
+    advancedMatching: false,
     events: [
       { 
         name: 'PageView', 
         found: true, 
         status: 'success',
-        description: 'Sayfa görüntüleme olayı doğru şekilde yapılandırılmış.' 
+        description: 'Sayfa görüntüleme olayı doğru şekilde yapılandırılmış.',
+        importance: 'critical',
+        lastTriggered: '1 dakika önce',
+        frequency: 1254,
+        firstDetected: '30 gün önce',
+        whyImportant: 'Sayfa görüntülemelerini kaydeder. Bu, tüm Meta piksel uygulamaları için temel olaydır ve hedefleme ve analiz için gereklidir.',
+        howToFix: 'Bu olay zaten doğru şekilde çalışıyor.',
+        parameters: []
       },
       { 
         name: 'ViewContent', 
         found: true, 
         status: 'success',
-        description: 'İçerik görüntüleme olayı doğru şekilde yapılandırılmış.' 
+        description: 'İçerik görüntüleme olayı doğru şekilde yapılandırılmış.',
+        importance: 'recommended',
+        lastTriggered: '5 dakika önce',
+        frequency: 658,
+        firstDetected: '30 gün önce',
+        whyImportant: 'Ürün sayfası görüntülemelerini kaydeder. Yeniden hedefleme kampanyaları için önemlidir.',
+        howToFix: 'Bu olay zaten doğru şekilde çalışıyor.',
+        parameters: [
+          { name: 'content_type', found: true, required: true, value: 'product' },
+          { name: 'content_ids', found: true, required: true, value: '["ID-12345"]' }
+        ]
       },
       { 
         name: 'AddToCart', 
         found: true, 
         status: 'warning',
-        description: 'Sepete ekleme olayı bulunuyor ancak content_ids parametresi eksik.' 
+        description: 'Sepete ekleme olayı bulunuyor ancak content_ids parametresi eksik.',
+        importance: 'critical',
+        lastTriggered: '10 dakika önce',
+        frequency: 78,
+        firstDetected: '30 gün önce',
+        whyImportant: 'Kullanıcıların sepete ekledikleri ürünleri kaydeder. Dönüşüm hunisi optimizasyonu ve terkedilen sepet kampanyaları için kritik öneme sahiptir.',
+        howToFix: 'content_ids parametresi eksik. Bu, hangi ürünlerin sepete eklendiğini belirtir. Ürün ID\'lerini bir dizi içinde geçmeniz gerekiyor.',
+        parameters: [
+          { name: 'content_type', found: true, required: true, value: 'product' },
+          { name: 'content_ids', found: false, required: true, example: '["ID-12345"]' },
+          { name: 'value', found: true, required: false, value: '149.99' },
+          { name: 'currency', found: true, required: false, value: 'TRY' }
+        ]
       },
       { 
         name: 'Purchase', 
         found: false, 
         status: 'error',
-        description: 'Satın alma olayı bulunamadı. Meta Pixel için kritik bir olay eksik.' 
+        description: 'Satın alma olayı bulunamadı. Meta Pixel için kritik bir olay eksik.',
+        importance: 'critical',
+        whyImportant: 'Tamamlanan satın almaları kaydeder. Meta reklamlarınızın dönüşüm performansını ölçmek için kritik öneme sahiptir. Bu olay olmadan ROAS hesaplanamaz ve Meta\'nın algoritması doğru çalışamaz.',
+        howToFix: 'Satın alma onay sayfasında Purchase olayını tetikleyin. content_ids, value ve currency parametrelerini eklemeniz gerekiyor.',
+        parameters: [
+          { name: 'content_type', found: false, required: true, example: 'product' },
+          { name: 'content_ids', found: false, required: true, example: '["ID-12345"]' },
+          { name: 'value', found: false, required: true, example: '149.99' },
+          { name: 'currency', found: false, required: true, example: 'TRY' }
+        ]
       }
     ],
     issues: [
       'Meta Conversion API entegrasyonu bulunamadı.',
       'Satın alma (Purchase) olayı bulunamadı.',
-      'Sepete ekleme olayında content_ids parametresi eksik.'
+      'Sepete ekleme olayında content_ids parametresi eksik.',
+      'İleri düzey eşleştirme (Advanced Matching) özelliği aktif değil.'
     ],
     recommendations: [
       'ITP ve tarayıcı sınırlamalarını aşmak için Meta Conversion API\'ı ekleyin.',
       'Purchase olayını hem Pixel hem de Conversion API ile entegre edin.',
-      'AddToCart olayına content_ids parametresini ekleyin.'
+      'AddToCart olayına content_ids parametresini ekleyin.',
+      'Daha iyi eşleştirme ve reklam performansı için Advanced Matching özelliğini etkinleştirin.'
     ]
   }
 };
@@ -285,6 +440,533 @@ const ExpandablePanel: React.FC<{
           {children}
         </div>
       )}
+    </div>
+  );
+};
+
+// Platform Kartı bileşeni
+const PlatformCard: React.FC<{
+  title: string;
+  icon: React.ReactNode;
+  status: StatusType;
+  connected: boolean;
+  integrationType: IntegrationType;
+  eventCount: { found: number, total: number };
+  healthScore: number;
+  criticalIssue?: string;
+  onViewDetails: () => void;
+}> = ({ title, icon, status, connected, integrationType, eventCount, healthScore, criticalIssue, onViewDetails }) => {
+  
+  // İntegrasyon tipini anlaşılır metne dönüştür
+  const getIntegrationTypeLabel = (type: IntegrationType) => {
+    switch (type) {
+      case 'pixel': return 'Pixel';
+      case 'api': return 'API';
+      case 'gtm': return 'GTM';
+      case 'code': return 'Kod';
+      case 'other': return 'Diğer';
+      default: return type;
+    }
+  };
+  
+  return (
+    <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
+      <div className={`h-2 ${
+        status === 'success' ? 'bg-success-500' : 
+        status === 'warning' ? 'bg-warning-500' : 
+        status === 'error' ? 'bg-error-500' : 'bg-gray-300'
+      }`}></div>
+      
+      <div className="p-5">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center">
+            <div className="flex-shrink-0 mr-3">
+              {icon}
+            </div>
+            <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+          </div>
+          
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            status === 'success' ? 'bg-success-100 text-success-800' : 
+            status === 'warning' ? 'bg-warning-100 text-warning-800' : 
+            status === 'error' ? 'bg-error-100 text-error-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            {connected ? (
+              status === 'success' ? 'Aktif' : 
+              status === 'warning' ? 'Sorun Var' : 
+              status === 'error' ? 'Kritik Hata' : 'Bilinmiyor'
+            ) : 'Bağlı Değil'}
+          </span>
+        </div>
+        
+        <div className="mb-4">
+          <div className="flex items-center justify-between text-sm mb-1">
+            <span className="text-gray-500">Sağlık Puanı</span>
+            <span className="font-medium">%{healthScore}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className={`h-2 rounded-full ${
+              healthScore >= 80 ? 'bg-success-500' : 
+              healthScore >= 50 ? 'bg-warning-500' : 
+              'bg-error-500'
+            }`} style={{ width: `${healthScore}%` }}></div>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
+          <div>
+            <span className="text-gray-500 block">Entegrasyon Tipi</span>
+            <span className="font-medium">{getIntegrationTypeLabel(integrationType)}</span>
+          </div>
+          
+          <div>
+            <span className="text-gray-500 block">Olaylar</span>
+            <span className="font-medium">{eventCount.found}/{eventCount.total}</span>
+          </div>
+        </div>
+        
+        {criticalIssue && (
+          <div className="bg-error-50 border-l-4 border-error-500 p-3 mb-4 text-sm text-error-700">
+            {criticalIssue}
+          </div>
+        )}
+        
+        <button
+          onClick={onViewDetails}
+          className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700"
+        >
+          Detaya Git
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// Olay Detayları Kartı
+const EventDetailsCard: React.FC<{
+  event: EventCheck;
+  onCopyEventData?: () => void;
+}> = ({ event, onCopyEventData }) => {
+  const [expanded, setExpanded] = useState(!event.found || event.status !== 'success');
+  
+  return (
+    <div className={`mb-4 rounded-lg border overflow-hidden ${
+      event.status === 'success' ? 'border-success-200' : 
+      event.status === 'warning' ? 'border-warning-200' : 
+      event.status === 'error' ? 'border-error-200' : 'border-gray-200'
+    }`}>
+      <div 
+        className={`p-4 cursor-pointer flex items-center justify-between ${
+          event.status === 'success' ? 'bg-success-50' : 
+          event.status === 'warning' ? 'bg-warning-50' : 
+          event.status === 'error' ? 'bg-error-50' : 'bg-gray-50'
+        }`}
+        onClick={() => setExpanded(!expanded)}
+      >
+        <div className="flex items-center">
+          <StatusIcon status={event.status} />
+          <div className="ml-3">
+            <span className={`font-medium ${event.found ? '' : 'line-through text-gray-500'}`}>
+              {event.name}
+            </span>
+            <span className="text-xs ml-2 text-gray-500">
+              {event.importance === 'critical' ? '(Kritik)' : 
+               event.importance === 'recommended' ? '(Önerilen)' : '(İsteğe Bağlı)'}
+            </span>
+          </div>
+        </div>
+        
+        <div className="flex items-center">
+          {event.lastTriggered && (
+            <span className="text-xs text-gray-500 mr-4">
+              Son: {event.lastTriggered}
+            </span>
+          )}
+          
+          {event.frequency && (
+            <span className="text-xs text-gray-500 mr-4">
+              24s: {event.frequency}x
+            </span>
+          )}
+          
+          <ChevronDownIcon className={`h-5 w-5 text-gray-400 transition-transform ${expanded ? 'rotate-180' : ''}`} />
+        </div>
+      </div>
+      
+      {expanded && (
+        <div className="p-4 bg-white border-t border-gray-200">
+          <p className="text-sm text-gray-700 mb-4">{event.description}</p>
+          
+          {event.parameters && event.parameters.length > 0 && (
+            <div className="mb-4">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">Parametreler</h4>
+              <div className="bg-gray-50 rounded-lg overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parametre</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Durum</th>
+                      <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Değer/Örnek</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {event.parameters.map((param, idx) => (
+                      <tr key={idx} className={param.found ? '' : 'bg-error-50'}>
+                        <td className="px-4 py-2 text-sm text-gray-900">
+                          {param.name}
+                          {param.required && <span className="text-error-600 ml-1">*</span>}
+                        </td>
+                        <td className="px-4 py-2">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                            param.found ? 'bg-success-100 text-success-800' : 'bg-error-100 text-error-800'
+                          }`}>
+                            {param.found ? 'Bulundu' : 'Eksik'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2 text-sm text-gray-500">
+                          {param.found ? param.value : (param.example ? `Örnek: ${param.example}` : '-')}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            {event.whyImportant && (
+              <div className="bg-blue-50 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-blue-800 flex items-center mb-1">
+                  <InformationCircleIcon className="h-4 w-4 mr-1" />
+                  Neden Önemli?
+                </h4>
+                <p className="text-sm text-blue-700">{event.whyImportant}</p>
+              </div>
+            )}
+            
+            {event.howToFix && event.status !== 'success' && (
+              <div className="bg-primary-50 rounded-lg p-3">
+                <h4 className="text-sm font-medium text-primary-800 flex items-center mb-1">
+                  <CheckCircleIcon className="h-4 w-4 mr-1" />
+                  Nasıl Düzeltilir?
+                </h4>
+                <p className="text-sm text-primary-700">{event.howToFix}</p>
+              </div>
+            )}
+          </div>
+          
+          {event.technicalDetails && onCopyEventData && (
+            <div className="text-right">
+              <button
+                onClick={onCopyEventData}
+                className="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium text-gray-700 bg-gray-100 hover:bg-gray-200"
+              >
+                <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
+                Teknik Veriyi Kopyala
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Platform Detay Görünümü
+const PlatformDetailsView: React.FC<{
+  platformName: string;
+  data: GA4Check | AdsCheck | MetaCheck;
+  onBack: () => void;
+}> = ({ platformName, data, onBack }) => {
+  const [activeTab, setActiveTab] = useState<'events' | 'issues' | 'technical'>('events');
+  
+  // Platforma göre olayları getir
+  const getEvents = () => {
+    if ('events' in data) {
+      const events = [...data.events];
+      if ('ecommerceEvents' in data) {
+        return [...events, ...data.ecommerceEvents];
+      }
+      return events;
+    }
+    return [];
+  };
+  
+  const events = getEvents();
+  const issues = data.issues || [];
+  const recommendations = data.recommendations || [];
+  
+  // Platform spesifik alanları getir
+  const getPlatformSpecificData = () => {
+    if ('notSetPercentage' in data) { // GA4
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Not Set Oranı</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">%{data.notSetPercentage}</span>
+              <span className={`ml-2 text-xs ${
+                data.notSetPercentage < 5 ? 'text-success-600' : 
+                data.notSetPercentage < 10 ? 'text-warning-600' : 'text-error-600'
+              }`}>
+                {data.notSetPercentage < 5 ? 'İyi' : 
+                data.notSetPercentage < 10 ? 'Orta' : 'Kötü'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">E-ticaret Takibi</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">{data.hasEcommerce ? 'Aktif' : 'Pasif'}</span>
+              <span className={`ml-2 text-xs ${data.hasEcommerce ? 'text-success-600' : 'text-error-600'}`}>
+                {data.hasEcommerce ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Ölçüm ID</h4>
+            <div className="flex items-center">
+              <span className="text-lg font-medium">{data.measurementId || 'Bulunamadı'}</span>
+            </div>
+          </div>
+        </div>
+      );
+    } else if ('remarketing' in data) { // Google Ads
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">GA4 Bağlantısı</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">{data.linkedWithGA4 ? 'Aktif' : 'Pasif'}</span>
+              <span className={`ml-2 text-xs ${data.linkedWithGA4 ? 'text-success-600' : 'text-error-600'}`}>
+                {data.linkedWithGA4 ? 'Bağlı' : 'Bağlı Değil'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Dönüşüm Takibi</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">{data.conversionTracking ? 'Aktif' : 'Pasif'}</span>
+              <span className={`ml-2 text-xs ${data.conversionTracking ? 'text-success-600' : 'text-error-600'}`}>
+                {data.conversionTracking ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Yeniden Pazarlama</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">{data.remarketing ? 'Aktif' : 'Pasif'}</span>
+              <span className={`ml-2 text-xs ${data.remarketing ? 'text-success-600' : 'text-error-600'}`}>
+                {data.remarketing ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
+              </span>
+            </div>
+          </div>
+        </div>
+      );
+    } else if ('pixelDetected' in data) { // Meta
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Meta Pixel</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">{data.pixelDetected ? 'Aktif' : 'Pasif'}</span>
+              <span className={`ml-2 text-xs ${data.pixelDetected ? 'text-success-600' : 'text-error-600'}`}>
+                {data.pixelDetected ? 'Tespit Edildi' : 'Bulunamadı'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Conversion API</h4>
+            <div className="flex items-center">
+              <span className="text-2xl font-bold">{data.conversionAPI ? 'Aktif' : 'Pasif'}</span>
+              <span className={`ml-2 text-xs ${data.conversionAPI ? 'text-success-600' : 'text-error-600'}`}>
+                {data.conversionAPI ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg border border-gray-200 p-4">
+            <h4 className="text-sm font-medium text-gray-500 mb-1">Pixel ID</h4>
+            <div className="flex items-center">
+              <span className="text-lg font-medium">{data.pixelId || 'Bulunamadı'}</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    return null;
+  };
+  
+  return (
+    <div className="bg-white rounded-xl shadow-md overflow-hidden">
+      <div className={`border-b border-gray-200 p-4 ${
+        data.status === 'success' ? 'bg-success-50' : 
+        data.status === 'warning' ? 'bg-warning-50' : 
+        data.status === 'error' ? 'bg-error-50' : 'bg-gray-50'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <button
+              onClick={onBack}
+              className="mr-2 p-1 rounded-full hover:bg-gray-200"
+            >
+              <ChevronDownIcon className="h-5 w-5 transform -rotate-90 text-gray-500" />
+            </button>
+            <h2 className="text-xl font-medium text-gray-900">
+              {platformName} Denetimi
+            </h2>
+          </div>
+          
+          <div className="flex items-center">
+            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              data.status === 'success' ? 'bg-success-100 text-success-800' : 
+              data.status === 'warning' ? 'bg-warning-100 text-warning-800' : 
+              data.status === 'error' ? 'bg-error-100 text-error-800' : 'bg-gray-100 text-gray-800'
+            }`}>
+              Sağlık Puanı: %{data.healthScore}
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <div className="p-5">
+        <div className="mb-6">
+          {getPlatformSpecificData()}
+          
+          <div className="border-b border-gray-200 mb-4">
+            <nav className="flex -mb-px">
+              <button
+                onClick={() => setActiveTab('events')}
+                className={`px-4 py-2 text-sm font-medium ${
+                  activeTab === 'events' 
+                    ? 'border-b-2 border-primary-500 text-primary-600'
+                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Olaylar ve Parametreler
+              </button>
+              <button
+                onClick={() => setActiveTab('issues')}
+                className={`ml-8 px-4 py-2 text-sm font-medium ${
+                  activeTab === 'issues' 
+                    ? 'border-b-2 border-primary-500 text-primary-600'
+                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                Sorunlar ve Öneriler
+              </button>
+              {(data.rawEvents || ('techincalDetails' in data)) && (
+                <button
+                  onClick={() => setActiveTab('technical')}
+                  className={`ml-8 px-4 py-2 text-sm font-medium ${
+                    activeTab === 'technical' 
+                      ? 'border-b-2 border-primary-500 text-primary-600'
+                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Teknik Veriler
+                </button>
+              )}
+            </nav>
+          </div>
+          
+          {activeTab === 'events' && (
+            <div>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Olaylar</h3>
+                <div className="text-sm text-gray-500">
+                  {events.filter(e => e.found).length} / {events.length} tespit edildi
+                </div>
+              </div>
+              
+              <div className="space-y-1">
+                {events.map((event, idx) => (
+                  <EventDetailsCard 
+                    key={idx} 
+                    event={event} 
+                    onCopyEventData={event.technicalDetails ? () => {
+                      navigator.clipboard.writeText(event.technicalDetails || '');
+                      alert('Teknik veri panoya kopyalandı!');
+                    } : undefined}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'issues' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Tespit Edilen Sorunlar</h3>
+                {issues.length > 0 ? (
+                  <ul className="space-y-3">
+                    {issues.map((issue, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <ExclamationTriangleIcon className="h-5 w-5 text-warning-500 mr-2 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700">{issue}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">Sorun tespit edilmedi.</p>
+                )}
+              </div>
+              
+              <div className="bg-white rounded-lg border border-gray-200 p-5">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Öneriler</h3>
+                {recommendations.length > 0 ? (
+                  <ul className="space-y-3">
+                    {recommendations.map((recommendation, idx) => (
+                      <li key={idx} className="flex items-start">
+                        <CheckCircleIcon className="h-5 w-5 text-primary-500 mr-2 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-700">{recommendation}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-gray-500">Herhangi bir öneri bulunmuyor.</p>
+                )}
+              </div>
+            </div>
+          )}
+          
+          {activeTab === 'technical' && (
+            <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">Teknik Veriler</h3>
+                <button 
+                  onClick={() => {
+                    const rawData = JSON.stringify(data.rawEvents || {}, null, 2);
+                    navigator.clipboard.writeText(rawData);
+                    alert('Teknik veri panoya kopyalandı!');
+                  }}
+                  className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
+                  Kopyala
+                </button>
+              </div>
+              
+              <div className="bg-gray-900 rounded-lg p-4 overflow-auto max-h-96">
+                <pre className="text-xs text-gray-300">
+                  {data.rawEvents ? JSON.stringify(data.rawEvents, null, 2) : 'Teknik veri bulunmuyor.'}
+                </pre>
+              </div>
+              
+              <div className="mt-4 text-sm text-gray-500">
+                <p>Bu veri geliştirici ekibi için tasarlanmıştır ve teknik detaylar içerir.</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
@@ -415,7 +1097,7 @@ const TagAssistant: React.FC = () => {
             <h3 className="text-lg font-medium mb-2">E-ticaret Olayları</h3>
             <div className="space-y-2">
               {tagData.ga4.ecommerceEvents.map((event, idx) => (
-                <EventCheckCard key={idx} event={event} />
+                <EventDetailsCard key={idx} event={event} />
               ))}
             </div>
           </div>
@@ -425,7 +1107,7 @@ const TagAssistant: React.FC = () => {
           <h3 className="text-lg font-medium mb-2">Temel Olaylar</h3>
           <div className="space-y-2">
             {tagData.ga4.events.map((event, idx) => (
-              <EventCheckCard key={idx} event={event} />
+              <EventDetailsCard key={idx} event={event} />
             ))}
           </div>
         </div>
@@ -512,7 +1194,7 @@ const TagAssistant: React.FC = () => {
           <h3 className="text-lg font-medium mb-2">Meta Olayları</h3>
           <div className="space-y-2">
             {tagData.meta.events.map((event, idx) => (
-              <EventCheckCard key={idx} event={event} />
+              <EventDetailsCard key={idx} event={event} />
             ))}
           </div>
         </div>
