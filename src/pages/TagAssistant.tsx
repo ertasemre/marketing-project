@@ -53,6 +53,114 @@ interface GA4Check {
   status: StatusType;
   issues: string[];
   recommendations: string[];
+  // Yeni GA4 denetim alanları
+  dataStreams?: {
+    web: boolean;
+    ios: boolean;
+    android: boolean;
+    multipleStreams: boolean;
+  };
+  tagHealth?: {
+    isWorking: boolean;
+    wrongOrder: boolean;
+    duplicated: boolean;
+    eventsBeforePageview: boolean;
+  };
+  loadTiming?: {
+    averageLoadTime: number; // ms cinsinden
+    isSlow: boolean;
+  };
+  installationMethod?: {
+    gtm: boolean;
+    hardcoded: boolean;
+    multipleInstances: boolean;
+  };
+  generalSettings?: {
+    timezone: string;
+    currency: string;
+    industry: string;
+    correctSettings: boolean;
+  };
+  dataSettings?: {
+    googleSignals: boolean;
+    dataRetention: number; // Ay cinsinden
+    recommendedRetention: boolean;
+  };
+  attributionSettings?: {
+    model: 'data-driven' | 'last-click' | 'first-click' | 'linear' | 'position-based' | 'time-decay';
+    conversionWindow: number; // Gün cinsinden
+    acquisitionWindow: number; // Gün cinsinden
+  };
+  domainSetup?: {
+    domains: string[];
+    hasCrossDomainIssues: boolean;
+  };
+  botTraffic?: {
+    percentage: number;
+    isHigh: boolean;
+  };
+  devTraffic?: {
+    hasLocalhost: boolean;
+    hasTestEnvironment: boolean;
+    hasPaymentGateways: boolean;
+    percentage: number;
+  };
+  anomalies?: {
+    users: { detected: boolean; date?: string; percentage?: number }[];
+    sessions: { detected: boolean; date?: string; percentage?: number }[];
+    pageviews: { detected: boolean; date?: string; percentage?: number }[];
+    conversions: { detected: boolean; date?: string; percentage?: number }[];
+  };
+  eventTracking?: {
+    automatic: number;
+    recommended: number;
+    custom: number;
+    missingCritical: string[];
+  };
+  eventNaming?: {
+    consistent: boolean;
+    hasUppercase: boolean;
+    recommendedFormat: 'snake_case' | 'camelCase';
+  };
+  conversionEvents?: {
+    total: number;
+    active: number;
+    withValue: number;
+  };
+  siteSearch?: {
+    isConfigured: boolean;
+    isWorking: boolean;
+    searchTerm: string;
+  };
+  utmAndChannels?: {
+    directTrafficPercentage: number;
+    highDirectTraffic: boolean;
+    hasCustomChannels: boolean;
+  };
+  ecommerce?: {
+    hasFunnelEvents: boolean;
+    missingParameters: { event: string; params: string[] }[];
+    hasUniqueTransactionId: boolean;
+    duplicateTransactions: number;
+  };
+  googleAdsLink?: {
+    isLinked: boolean;
+    notSetPercentage: number;
+  };
+  bigQueryLink?: {
+    isLinked: boolean;
+    hasDailyExport: boolean;
+  };
+  audiences?: {
+    automatic: number;
+    manual: number;
+    predictive: number;
+  };
+  customDefinitions?: {
+    dimensions: number;
+    metrics: number;
+  };
+  rawData?: any; // Teknik veriler için
 }
 
 interface AdsCheck {
@@ -67,6 +175,91 @@ interface AdsCheck {
   enhancedConversions?: boolean;
   issues: string[];
   recommendations: string[];
+  // Yeni Google Ads denetim alanları
+  campaignTypes?: {
+    search: boolean;
+    pmax: boolean;
+    display: boolean;
+    demandGen: boolean;
+    shopping: boolean;
+    video: boolean;
+    missingTypes: string[];
+  };
+  campaignNaming?: {
+    consistent: boolean;
+    issues: string[];
+  };
+  accountSettings?: {
+    autoTagging: boolean;
+    enhancedConversions: boolean;
+    leadFormTerms: boolean;
+  };
+  autoApplyRecommendations?: {
+    count: number;
+    isExcessive: boolean;
+  };
+  exclusionLists?: {
+    ip: boolean;
+    apps: boolean;
+    placements: boolean;
+    negativeKeywords: boolean;
+  };
+  conversionSettings?: {
+    total: number;
+    primary: number;
+    sources: {
+      web: number;
+      analytics: number;
+      app: number;
+      call: number;
+      other: number;
+    };
+    funnelComplete: boolean;
+  };
+  attributionModel?: {
+    currentModel: string;
+    lastClickEvents: number;
+    dataDriverEligible: number;
+  };
+  keywordQuality?: {
+    lowQualityPercentage: number;
+    caseSensitiveCount: number;
+    distribution: {
+      broad: number;
+      exact: number;
+      phrase: number;
+    };
+    matchTypePerformance: {
+      bestPerformingType: string;
+      worstPerformingType: string;
+    };
+  };
+  searchTermPerformance?: {
+    addedVsNotAddedCost: number; // % olarak fark
+    exactMatchSuggestions: number;
+  };
+  adQuality?: {
+    adsPerAdGroup: number;
+    adGroupsWithLessThanThreeAds: number;
+    adStrengthDistribution: {
+      excellent: number;
+      good: number;
+      average: number;
+      poor: number;
+    };
+    disapprovedAds: number;
+  };
+  adExtensions?: {
+    hasSitelinks: boolean;
+    hasCallouts: boolean;
+    hasStructuredSnippets: boolean;
+    campaignsWithLessThanFourExtensions: number;
+  };
+  landingPageQuality?: {
+    brokenUrls: number;
+    redirectUrls: number;
+  };
+  rawData?: any; // Teknik veriler için
 }
 
 interface MetaCheck {
@@ -81,6 +274,7 @@ interface MetaCheck {
   events: EventCheck[];
   issues: string[];
   recommendations: string[];
+  rawData?: any; // Teknik veriler için
 }
 
 interface TagAssistantData {
@@ -227,7 +421,146 @@ const mockTagAssistantData: TagAssistantData = {
       'Sayfa URL yönlendirmelerini kontrol edin ve tüm sayfalarda GA4 tag\'inin doğru yüklendiğinden emin olun.',
       'purchase olayına benzersiz transaction_id ekleyin.',
       'begin_checkout olayına value ve currency parametrelerini ekleyin.'
-    ]
+    ],
+    // Yeni GA4 denetim alanları
+    dataStreams: {
+      web: true,
+      ios: true,
+      android: false,
+      multipleStreams: true
+    },
+    tagHealth: {
+      isWorking: true,
+      wrongOrder: false,
+      duplicated: true,
+      eventsBeforePageview: true
+    },
+    loadTiming: {
+      averageLoadTime: 1850, // ms cinsinden
+      isSlow: true
+    },
+    installationMethod: {
+      gtm: true,
+      hardcoded: false,
+      multipleInstances: true
+    },
+    generalSettings: {
+      timezone: 'Europe/Istanbul',
+      currency: 'TRY',
+      industry: 'E-commerce',
+      correctSettings: true
+    },
+    dataSettings: {
+      googleSignals: false,
+      dataRetention: 2, // Ay cinsinden
+      recommendedRetention: false
+    },
+    attributionSettings: {
+      model: 'last-click',
+      conversionWindow: 30, // Gün cinsinden
+      acquisitionWindow: 30 // Gün cinsinden
+    },
+    domainSetup: {
+      domains: ['example.com', 'blog.example.com', 'shop.example.com'],
+      hasCrossDomainIssues: true
+    },
+    botTraffic: {
+      percentage: 12.5,
+      isHigh: true
+    },
+    devTraffic: {
+      hasLocalhost: true,
+      hasTestEnvironment: true,
+      hasPaymentGateways: false,
+      percentage: 5.2
+    },
+    anomalies: {
+      users: [
+        { detected: true, date: '2023-05-15', percentage: 45 },
+        { detected: true, date: '2023-06-02', percentage: -30 }
+      ],
+      sessions: [
+        { detected: true, date: '2023-05-15', percentage: 40 }
+      ],
+      pageviews: [
+        { detected: false }
+      ],
+      conversions: [
+        { detected: true, date: '2023-06-10', percentage: -60 }
+      ]
+    },
+    eventTracking: {
+      automatic: 8,
+      recommended: 4,
+      custom: 12,
+      missingCritical: ['login', 'sign_up', 'generate_lead']
+    },
+    eventNaming: {
+      consistent: false,
+      hasUppercase: true,
+      recommendedFormat: 'snake_case'
+    },
+    conversionEvents: {
+      total: 8,
+      active: 6,
+      withValue: 3
+    },
+    siteSearch: {
+      isConfigured: true,
+      isWorking: false,
+      searchTerm: 'q'
+    },
+    utmAndChannels: {
+      directTrafficPercentage: 42.5,
+      highDirectTraffic: true,
+      hasCustomChannels: false
+    },
+    ecommerce: {
+      hasFunnelEvents: true,
+      missingParameters: [
+        { event: 'purchase', params: ['transaction_id'] },
+        { event: 'begin_checkout', params: ['value', 'currency'] }
+      ],
+      hasUniqueTransactionId: false,
+      duplicateTransactions: 8
+    },
+    googleAdsLink: {
+      isLinked: true,
+      notSetPercentage: 15.2
+    },
+    bigQueryLink: {
+      isLinked: false,
+      hasDailyExport: false
+    },
+    audiences: {
+      automatic: 3,
+      manual: 5,
+      predictive: 0
+    },
+    customDefinitions: {
+      dimensions: 8,
+      metrics: 2
+    },
+    rawData: {
+      // Teknik inceleme verileri burada olacak
+      measurementId: 'G-ABC123XYZ',
+      timestamp: new Date().toISOString(),
+      pageLoadTime: {
+        avg: 1850,
+        min: 950,
+        max: 3200
+      },
+      eventSequence: [
+        { name: 'page_view', time: 0 },
+        { name: 'user_engagement', time: 1200 },
+        { name: 'add_to_cart', time: 4500 }
+      ],
+      debugMode: false,
+      consentStatus: {
+        analytics_storage: 'granted',
+        ad_storage: 'denied'
+      }
+    }
   },
   googleAds: {
     connected: true,
@@ -247,7 +580,18 @@ const mockTagAssistantData: TagAssistantData = {
       'Google Ads remarketing tag\'ini etkinleştirin ve tüm sayfalarda çalıştığından emin olun.',
       'Tüm ürün kategorileri için dönüşüm izleme kurallarını kontrol edin.',
       'Gelişmiş dönüşüm özelliğini (Enhanced Conversions) etkinleştirerek ölçüm doğruluğunu artırın.'
-    ]
+    ],
+    rawData: {
+      // Teknik inceleme verileri burada olacak
+      adIds: ['AW-123456789'],
+      loadTimes: {
+        avg: 780,
+        min: 450,
+        max: 1200
+      },
+      conversionsConfigured: true,
+      remarketingConfigured: false
+    }
   },
   meta: {
     pixelDetected: true,
@@ -333,7 +677,17 @@ const mockTagAssistantData: TagAssistantData = {
       'Purchase olayını hem Pixel hem de Conversion API ile entegre edin.',
       'AddToCart olayına content_ids parametresini ekleyin.',
       'Daha iyi eşleştirme ve reklam performansı için Advanced Matching özelliğini etkinleştirin.'
-    ]
+    ],
+    rawData: {
+      // Teknik inceleme verileri burada olacak
+      pixelId: '123456789012345',
+      version: '2.9.115',
+      capi: false,
+      events: [
+        { name: 'PageView', params: {} },
+        { name: 'ViewContent', params: { content_type: 'product', content_ids: ['ID-12345'] } }
+      ]
+    }
   }
 };
 
@@ -862,7 +1216,7 @@ const PlatformDetailsView: React.FC<{
               >
                 Sorunlar ve Öneriler
               </button>
-              {(data.rawEvents || ('techincalDetails' in data)) && (
+              {('rawData' in data) && (
                 <button
                   onClick={() => setActiveTab('technical')}
                   className={`ml-8 px-4 py-2 text-sm font-medium ${
@@ -943,7 +1297,7 @@ const PlatformDetailsView: React.FC<{
                 <h3 className="text-lg font-medium text-gray-900">Teknik Veriler</h3>
                 <button 
                   onClick={() => {
-                    const rawData = JSON.stringify(data.rawEvents || {}, null, 2);
+                    const rawData = JSON.stringify(data.rawData || {}, null, 2);
                     navigator.clipboard.writeText(rawData);
                     alert('Teknik veri panoya kopyalandı!');
                   }}
@@ -956,7 +1310,7 @@ const PlatformDetailsView: React.FC<{
               
               <div className="bg-gray-900 rounded-lg p-4 overflow-auto max-h-96">
                 <pre className="text-xs text-gray-300">
-                  {data.rawEvents ? JSON.stringify(data.rawEvents, null, 2) : 'Teknik veri bulunmuyor.'}
+                  {data.rawData ? JSON.stringify(data.rawData, null, 2) : 'Teknik veri bulunmuyor.'}
                 </pre>
               </div>
               
