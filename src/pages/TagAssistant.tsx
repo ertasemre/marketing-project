@@ -8,7 +8,8 @@ import {
   ChevronUpIcon,
   InformationCircleIcon,
   DocumentDuplicateIcon,
-  ArrowTopRightOnSquareIcon
+  ArrowTopRightOnSquareIcon,
+  ArrowLeftIcon
 } from '@heroicons/react/24/outline';
 
 // Analiz sonuçları için tip tanımlamaları
@@ -811,25 +812,40 @@ const PlatformCard: React.FC<{
   onViewDetails: () => void;
 }> = ({ title, icon, status, connected, integrationType, eventCount, healthScore, criticalIssue, onViewDetails }) => {
   
-  // İntegrasyon tipini anlaşılır metne dönüştür
   const getIntegrationTypeLabel = (type: IntegrationType) => {
     switch (type) {
       case 'pixel': return 'Pixel';
       case 'api': return 'API';
       case 'gtm': return 'GTM';
-      case 'code': return 'Kod';
+      case 'code': return 'Hardcoded';
       case 'other': return 'Diğer';
-      default: return type;
+      default: return 'Bilinmiyor';
     }
   };
   
+  const statusColorClass = 
+    status === 'success' ? 'bg-success-500' : 
+    status === 'warning' ? 'bg-warning-500' : 
+    status === 'error' ? 'bg-error-500' : 'bg-gray-300';
+    
+  const statusBadgeClass = 
+    status === 'success' ? 'bg-success-100 text-success-800' : 
+    status === 'warning' ? 'bg-warning-100 text-warning-800' : 
+    status === 'error' ? 'bg-error-100 text-error-800' : 'bg-gray-100 text-gray-800';
+    
+  const statusText = connected ? (
+    status === 'success' ? 'Aktif' : 
+    status === 'warning' ? 'Sorun Var' : 
+    status === 'error' ? 'Kritik Hata' : 'Bilinmiyor'
+  ) : 'Bağlı Değil';
+  
+  const healthColorClass = 
+    healthScore >= 80 ? 'bg-success-500' : 
+    healthScore >= 50 ? 'bg-warning-500' : 'bg-error-500';
+  
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className={`h-2 ${
-        status === 'success' ? 'bg-success-500' : 
-        status === 'warning' ? 'bg-warning-500' : 
-        status === 'error' ? 'bg-error-500' : 'bg-gray-300'
-      }`></div>
+      <div className={`h-2 ${statusColorClass}`}></div>
       
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
@@ -840,16 +856,8 @@ const PlatformCard: React.FC<{
             <h3 className="text-lg font-medium text-gray-900">{title}</h3>
           </div>
           
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-            status === 'success' ? 'bg-success-100 text-success-800' : 
-            status === 'warning' ? 'bg-warning-100 text-warning-800' : 
-            status === 'error' ? 'bg-error-100 text-error-800' : 'bg-gray-100 text-gray-800'
-          }`}>
-            {connected ? (
-              status === 'success' ? 'Aktif' : 
-              status === 'warning' ? 'Sorun Var' : 
-              status === 'error' ? 'Kritik Hata' : 'Bilinmiyor'
-            ) : 'Bağlı Değil'}
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusBadgeClass}`}>
+            {statusText}
           </span>
         </div>
         
@@ -859,11 +867,10 @@ const PlatformCard: React.FC<{
             <span className="font-medium">%{healthScore}</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className={`h-2 rounded-full ${
-              healthScore >= 80 ? 'bg-success-500' : 
-              healthScore >= 50 ? 'bg-warning-500' : 
-              'bg-error-500'
-            }`} style={{ width: `${healthScore}%` }}></div>
+            <div 
+              className={`h-2 rounded-full ${healthColorClass}`} 
+              style={{ width: `${healthScore}%` }}
+            ></div>
           </div>
         </div>
         
@@ -1126,13 +1133,188 @@ const MetaDetailAnalysis: React.FC<{ data: MetaCheck }> = ({ data }) => {
   );
 };
 
+// GA4 Detay Komponenti
+const GA4DetailModule: React.FC<{ data: GA4Check }> = ({ data }) => {
+  return (
+    <div className="space-y-6">
+      {/* 1. Veri Akışı (Data Streams) */}
+      {data.dataStreams && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Veri Akışı (Data Streams)</h3>
+          
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Web</p>
+              <p className={`text-sm font-medium ${data.dataStreams.web ? 'text-success-600' : 'text-gray-400'}`}>
+                {data.dataStreams.web ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">iOS</p>
+              <p className={`text-sm font-medium ${data.dataStreams.ios ? 'text-success-600' : 'text-gray-400'}`}>
+                {data.dataStreams.ios ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Android</p>
+              <p className={`text-sm font-medium ${data.dataStreams.android ? 'text-success-600' : 'text-gray-400'}`}>
+                {data.dataStreams.android ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+          </div>
+          
+          {data.dataStreams.multipleStreams && (
+            <div className="bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                Birden fazla stream aynı property içinde yer alıyor olabilir, bu önerilmez.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 2. Tag Sağlığı */}
+      {data.tagHealth && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Tag Sağlığı</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.tagHealth.isWorking ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Tag Çalışıyor</p>
+                <p className="text-xs text-gray-500">{data.tagHealth.isWorking ? 'Evet' : 'Hayır'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${!data.tagHealth.wrongOrder ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Doğru Sırada</p>
+                <p className="text-xs text-gray-500">{!data.tagHealth.wrongOrder ? 'Evet' : 'Hayır'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${!data.tagHealth.duplicated ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Tekrarlı Yükleme</p>
+                <p className="text-xs text-gray-500">{!data.tagHealth.duplicated ? 'Yok' : 'Var'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${!data.tagHealth.eventsBeforePageview ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">PageView'den Önce Event</p>
+                <p className="text-xs text-gray-500">{!data.tagHealth.eventsBeforePageview ? 'Yok' : 'Var'}</p>
+              </div>
+            </div>
+          </div>
+          
+          {(data.tagHealth.wrongOrder || data.tagHealth.duplicated || data.tagHealth.eventsBeforePageview) && (
+            <div className="mt-4 bg-error-50 border-l-4 border-error-500 p-3">
+              <p className="text-sm text-error-700">
+                Tag sağlığında sorunlar tespit edildi. GA4 tag'in doğru şekilde yüklenmesi ve çalışması için gerekli düzeltmeleri yapın.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Diğer GA4 modülleri burada... */}
+    </div>
+  );
+};
+
+// Google Ads Detay Komponenti
+const GoogleAdsDetailModule: React.FC<{ data: AdsCheck }> = ({ data }) => {
+  return (
+    <div className="space-y-6">
+      {/* 1. Kampanya Türleri ve Performansı */}
+      {data.campaignTypes && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Kampanya Türleri ve Performansı</h3>
+          
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Search</p>
+              <p className={`text-sm font-medium ${data.campaignTypes.search ? 'text-success-600' : 'text-gray-400'}`}>
+                {data.campaignTypes.search ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">PMax</p>
+              <p className={`text-sm font-medium ${data.campaignTypes.pmax ? 'text-success-600' : 'text-gray-400'}`}>
+                {data.campaignTypes.pmax ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Display</p>
+              <p className={`text-sm font-medium ${data.campaignTypes.display ? 'text-success-600' : 'text-gray-400'}`}>
+                {data.campaignTypes.display ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+          </div>
+          
+          {data.campaignTypes.missingTypes && data.campaignTypes.missingTypes.length > 0 && (
+            <div className="bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                <span className="font-medium">Eksik kampanya türleri: </span>
+                {data.campaignTypes.missingTypes.join(', ')}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 2. Kampanya İsimlendirme */}
+      {data.campaignNaming && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Kampanya İsimlendirme</h3>
+          
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-gray-600">İsimlendirme tutarlılığı</p>
+            {data.campaignNaming.consistent ? (
+              <span className="bg-success-100 text-success-800 text-xs px-2 py-1 rounded-full flex items-center">
+                <CheckCircleIcon className="h-4 w-4 mr-1" /> Tutarlı
+              </span>
+            ) : (
+              <span className="bg-error-100 text-error-800 text-xs px-2 py-1 rounded-full flex items-center">
+                <ExclamationTriangleIcon className="h-4 w-4 mr-1" /> Tutarsız
+              </span>
+            )}
+          </div>
+          
+          {!data.campaignNaming.consistent && data.campaignNaming.issues.length > 0 && (
+            <div className="bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700 font-medium mb-2">Tespit edilen uyumsuzluklar:</p>
+              <ul className="list-disc list-inside text-sm text-warning-700">
+                {data.campaignNaming.issues.map((issue, idx) => (
+                  <li key={idx}>{issue}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Diğer Google Ads modülleri burada... */}
+    </div>
+  );
+};
+
 // Platform Detay Görünümü
 const PlatformDetailsView: React.FC<{
   platformName: string;
   data: GA4Check | AdsCheck | MetaCheck;
   onBack: () => void;
 }> = ({ platformName, data, onBack }) => {
-  const [activeTab, setActiveTab] = useState<'events' | 'issues' | 'technical'>('events');
+  const [activeTab, setActiveTab] = useState<'overview' | 'events' | 'issues' | 'technical'>('overview');
   
   // Platforma göre olayları getir
   const getEvents = () => {
@@ -1150,274 +1332,186 @@ const PlatformDetailsView: React.FC<{
   const issues = data.issues || [];
   const recommendations = data.recommendations || [];
   
-  // Platform spesifik alanları getir
-  const getPlatformSpecificData = () => {
-    if ('notSetPercentage' in data) { // GA4
+  // Platform spesifik içeriği render et
+  const renderPlatformContent = () => {
+    if (platformName === 'Google Analytics 4' && 'notSetPercentage' in data) {
+      return <GA4DetailModule data={data} />;
+    } else if (platformName === 'Google Ads' && 'remarketing' in data) {
+      return <GoogleAdsDetailModule data={data} />;
+    } else if (platformName === 'Meta' && 'pixelDetected' in data) {
+      // Meta detayları burada render edilebilir
       return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Not Set Oranı</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">%{data.notSetPercentage}</span>
-              <span className={`ml-2 text-xs ${
-                data.notSetPercentage < 5 ? 'text-success-600' : 
-                data.notSetPercentage < 10 ? 'text-warning-600' : 'text-error-600'
-              }`}>
-                {data.notSetPercentage < 5 ? 'İyi' : 
-                data.notSetPercentage < 10 ? 'Orta' : 'Kötü'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">E-ticaret Takibi</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">{data.hasEcommerce ? 'Aktif' : 'Pasif'}</span>
-              <span className={`ml-2 text-xs ${data.hasEcommerce ? 'text-success-600' : 'text-error-600'}`}>
-                {data.hasEcommerce ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Ölçüm ID</h4>
-            <div className="flex items-center">
-              <span className="text-lg font-medium">{data.measurementId || 'Bulunamadı'}</span>
-            </div>
-          </div>
-        </div>
-      );
-    } else if ('remarketing' in data) { // Google Ads
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">GA4 Bağlantısı</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">{data.linkedWithGA4 ? 'Aktif' : 'Pasif'}</span>
-              <span className={`ml-2 text-xs ${data.linkedWithGA4 ? 'text-success-600' : 'text-error-600'}`}>
-                {data.linkedWithGA4 ? 'Bağlı' : 'Bağlı Değil'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Dönüşüm Takibi</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">{data.conversionTracking ? 'Aktif' : 'Pasif'}</span>
-              <span className={`ml-2 text-xs ${data.conversionTracking ? 'text-success-600' : 'text-error-600'}`}>
-                {data.conversionTracking ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Yeniden Pazarlama</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">{data.remarketing ? 'Aktif' : 'Pasif'}</span>
-              <span className={`ml-2 text-xs ${data.remarketing ? 'text-success-600' : 'text-error-600'}`}>
-                {data.remarketing ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
-              </span>
-            </div>
-          </div>
-        </div>
-      );
-    } else if ('pixelDetected' in data) { // Meta
-      return (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Meta Pixel</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">{data.pixelDetected ? 'Aktif' : 'Pasif'}</span>
-              <span className={`ml-2 text-xs ${data.pixelDetected ? 'text-success-600' : 'text-error-600'}`}>
-                {data.pixelDetected ? 'Tespit Edildi' : 'Bulunamadı'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Conversion API</h4>
-            <div className="flex items-center">
-              <span className="text-2xl font-bold">{data.conversionAPI ? 'Aktif' : 'Pasif'}</span>
-              <span className={`ml-2 text-xs ${data.conversionAPI ? 'text-success-600' : 'text-error-600'}`}>
-                {data.conversionAPI ? 'Yapılandırılmış' : 'Yapılandırılmamış'}
-              </span>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-lg border border-gray-200 p-4">
-            <h4 className="text-sm font-medium text-gray-500 mb-1">Pixel ID</h4>
-            <div className="flex items-center">
-              <span className="text-lg font-medium">{data.pixelId || 'Bulunamadı'}</span>
-            </div>
-          </div>
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Meta Pixel Temel Bilgiler</h3>
+          <p className="text-gray-600">Meta Pixel detay modülü henüz eklenmedi.</p>
         </div>
       );
     }
     return null;
   };
-  
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <div className={`border-b border-gray-200 p-4 ${
-        data.status === 'success' ? 'bg-success-50' : 
-        data.status === 'warning' ? 'bg-warning-50' : 
-        data.status === 'error' ? 'bg-error-50' : 'bg-gray-50'
-      }`}>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <button
-              onClick={onBack}
-              className="mr-2 p-1 rounded-full hover:bg-gray-200"
-            >
-              <ChevronDownIcon className="h-5 w-5 transform -rotate-90 text-gray-500" />
-            </button>
-            <h2 className="text-xl font-medium text-gray-900">
-              {platformName} Denetimi
-            </h2>
-          </div>
-          
-          <div className="flex items-center">
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              data.status === 'success' ? 'bg-success-100 text-success-800' : 
-              data.status === 'warning' ? 'bg-warning-100 text-warning-800' : 
-              data.status === 'error' ? 'bg-error-100 text-error-800' : 'bg-gray-100 text-gray-800'
-            }`}>
-              Sağlık Puanı: %{data.healthScore}
-            </span>
-          </div>
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+        <div className="flex items-center">
+          <button
+            onClick={onBack}
+            className="mr-4 text-gray-500 hover:text-gray-700"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+          </button>
+          <h2 className="text-xl font-semibold text-gray-900">{platformName} Detayları</h2>
+        </div>
+        
+        <div className="flex space-x-2">
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            data.status === 'success' ? 'bg-success-100 text-success-800' : 
+            data.status === 'warning' ? 'bg-warning-100 text-warning-800' : 
+            data.status === 'error' ? 'bg-error-100 text-error-800' : 'bg-gray-100 text-gray-800'
+          }`}>
+            Sağlık Skoru: %{data.healthScore}
+          </span>
         </div>
       </div>
       
-      <div className="p-5">
-        <div className="mb-6">
-          {getPlatformSpecificData()}
-          
-          <div className="border-b border-gray-200 mb-4">
-            <nav className="flex -mb-px">
-              <button
-                onClick={() => setActiveTab('events')}
-                className={`px-4 py-2 text-sm font-medium ${
-                  activeTab === 'events' 
-                    ? 'border-b-2 border-primary-500 text-primary-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Olaylar ve Parametreler
-              </button>
-              <button
-                onClick={() => setActiveTab('issues')}
-                className={`ml-8 px-4 py-2 text-sm font-medium ${
-                  activeTab === 'issues' 
-                    ? 'border-b-2 border-primary-500 text-primary-600'
-                    : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
-              >
-                Sorunlar ve Öneriler
-              </button>
-              {('rawData' in data) && (
-                <button
-                  onClick={() => setActiveTab('technical')}
-                  className={`ml-8 px-4 py-2 text-sm font-medium ${
-                    activeTab === 'technical' 
-                      ? 'border-b-2 border-primary-500 text-primary-600'
-                      : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  Teknik Veriler
-                </button>
-              )}
-            </nav>
-          </div>
-          
-          {activeTab === 'events' && (
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Olaylar</h3>
-                <div className="text-sm text-gray-500">
-                  {events.filter(e => e.found).length} / {events.length} tespit edildi
-                </div>
-              </div>
-              
-              <div className="space-y-1">
-                {events.map((event, idx) => (
-                  <EventDetailsCard 
-                    key={idx} 
-                    event={event} 
-                    onCopyEventData={event.technicalDetails ? () => {
-                      navigator.clipboard.writeText(event.technicalDetails || '');
-                      alert('Teknik veri panoya kopyalandı!');
-                    } : undefined}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {activeTab === 'issues' && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg border border-gray-200 p-5">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Tespit Edilen Sorunlar</h3>
-                {issues.length > 0 ? (
-                  <ul className="space-y-3">
-                    {issues.map((issue, idx) => (
-                      <li key={idx} className="flex items-start">
-                        <ExclamationTriangleIcon className="h-5 w-5 text-warning-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">{issue}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-gray-500">Sorun tespit edilmedi.</p>
-                )}
-              </div>
-              
-              <div className="bg-white rounded-lg border border-gray-200 p-5">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Öneriler</h3>
-                {recommendations.length > 0 ? (
-                  <ul className="space-y-3">
-                    {recommendations.map((recommendation, idx) => (
-                      <li key={idx} className="flex items-start">
-                        <CheckCircleIcon className="h-5 w-5 text-primary-500 mr-2 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-700">{recommendation}</span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm text-gray-500">Herhangi bir öneri bulunmuyor.</p>
-                )}
-              </div>
-            </div>
-          )}
-          
-          {activeTab === 'technical' && (
-            <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">Teknik Veriler</h3>
-                <button 
-                  onClick={() => {
-                    const rawData = JSON.stringify(data.rawData || {}, null, 2);
-                    navigator.clipboard.writeText(rawData);
-                    alert('Teknik veri panoya kopyalandı!');
-                  }}
-                  className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-                >
-                  <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
-                  Kopyala
-                </button>
-              </div>
-              
-              <div className="bg-gray-900 rounded-lg p-4 overflow-auto max-h-96">
-                <pre className="text-xs text-gray-300">
-                  {data.rawData ? JSON.stringify(data.rawData, null, 2) : 'Teknik veri bulunmuyor.'}
-                </pre>
-              </div>
-              
-              <div className="mt-4 text-sm text-gray-500">
-                <p>Bu veri geliştirici ekibi için tasarlanmıştır ve teknik detaylar içerir.</p>
-              </div>
-            </div>
+      <div className="bg-gray-50 px-6 py-4 border-b border-gray-200">
+        <div className="flex space-x-6">
+          <button
+            onClick={() => setActiveTab('overview')}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === 'overview' 
+                ? 'border-b-2 border-primary-500 text-primary-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Genel Bakış
+          </button>
+          <button
+            onClick={() => setActiveTab('events')}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === 'events' 
+                ? 'border-b-2 border-primary-500 text-primary-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Olaylar ve Parametreler
+          </button>
+          <button
+            onClick={() => setActiveTab('issues')}
+            className={`px-4 py-2 text-sm font-medium ${
+              activeTab === 'issues' 
+                ? 'border-b-2 border-primary-500 text-primary-600'
+                : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            Sorunlar ve Öneriler
+          </button>
+          {('rawData' in data) && (
+            <button
+              onClick={() => setActiveTab('technical')}
+              className={`px-4 py-2 text-sm font-medium ${
+                activeTab === 'technical' 
+                  ? 'border-b-2 border-primary-500 text-primary-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Teknik Veriler
+            </button>
           )}
         </div>
+      </div>
+      
+      <div className="p-6">
+        {activeTab === 'overview' && renderPlatformContent()}
+        
+        {activeTab === 'events' && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Olaylar</h3>
+              <div className="text-sm text-gray-500">
+                {events.filter(e => e.found).length} / {events.length} tespit edildi
+              </div>
+            </div>
+            
+            <div className="space-y-1">
+              {events.map((event, idx) => (
+                <EventDetailsCard 
+                  key={idx} 
+                  event={event} 
+                  onCopyEventData={event.technicalDetails ? () => {
+                    navigator.clipboard.writeText(event.technicalDetails || '');
+                    alert('Teknik veri panoya kopyalandı!');
+                  } : undefined}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {activeTab === 'issues' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Tespit Edilen Sorunlar</h3>
+              {issues.length > 0 ? (
+                <ul className="space-y-3">
+                  {issues.map((issue, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <ExclamationTriangleIcon className="h-5 w-5 text-warning-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-700">{issue}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">Sorun tespit edilmedi.</p>
+              )}
+            </div>
+            
+            <div className="bg-white rounded-lg border border-gray-200 p-5">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Öneriler</h3>
+              {recommendations.length > 0 ? (
+                <ul className="space-y-3">
+                  {recommendations.map((recommendation, idx) => (
+                    <li key={idx} className="flex items-start">
+                      <CheckCircleIcon className="h-5 w-5 text-primary-500 mr-2 flex-shrink-0 mt-0.5" />
+                      <span className="text-sm text-gray-700">{recommendation}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-gray-500">Herhangi bir öneri bulunmuyor.</p>
+              )}
+            </div>
+          </div>
+        )}
+        
+        {activeTab === 'technical' && 'rawData' in data && (
+          <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-medium text-gray-900">Teknik Veriler</h3>
+              <button 
+                onClick={() => {
+                  const rawData = JSON.stringify(data.rawData || {}, null, 2);
+                  navigator.clipboard.writeText(rawData);
+                  alert('Teknik veri panoya kopyalandı!');
+                }}
+                className="inline-flex items-center px-3 py-1 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+              >
+                <DocumentDuplicateIcon className="h-4 w-4 mr-1" />
+                Kopyala
+              </button>
+            </div>
+            
+            <div className="bg-gray-900 rounded-lg p-4 overflow-auto max-h-96">
+              <pre className="text-xs text-gray-300">
+                {data.rawData ? JSON.stringify(data.rawData, null, 2) : 'Teknik veri bulunmuyor.'}
+              </pre>
+            </div>
+            
+            <div className="mt-4 text-sm text-gray-500">
+              <p>Bu veri geliştirici ekibi için tasarlanmıştır ve teknik detaylar içerir.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
