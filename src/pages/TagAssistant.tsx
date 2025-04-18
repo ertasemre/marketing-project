@@ -221,6 +221,11 @@ interface AdsCheck {
     currentModel: string;
     lastClickEvents: number;
     dataDriverEligible: number;
+    // Yeni eklenen alanlar
+    name: string;
+    compatibleWithGA4: boolean;
+    shouldUpgrade: boolean;
+    recommendation: string;
   };
   keywordQuality?: {
     lowQualityPercentage: number;
@@ -234,10 +239,38 @@ interface AdsCheck {
       bestPerformingType: string;
       worstPerformingType: string;
     };
+    // Yeni eklenen alanlar
+    total: number;
+    avgQualityScore: number;
+    expectedCTR: string;
+    adRelevance: string;
+    landingPageExp: string;
   };
   searchTermPerformance?: {
     addedVsNotAddedCost: number; // % olarak fark
     exactMatchSuggestions: number;
+    // Yeni eklenen alanlar
+    totalTerms: number;
+    avgCTR: number;
+    negativeAdded: number;
+    categories: Array<{
+      name: string;
+      percentage: number;
+      relevance: string;
+    }>;
+    irrelevantPercentage: number;
+  };
+  adPresenceQuality?: {
+    avgPerGroup: number;
+    responsivePercentage: number;
+    adStrength: string;
+    isTestingEnabled: boolean;
+    adTypeDistribution: {
+      responsive: number;
+      expanded: number;
+      callOnly: number;
+      other: number;
+    };
   };
   adQuality?: {
     adsPerAdGroup: number;
@@ -255,10 +288,23 @@ interface AdsCheck {
     hasCallouts: boolean;
     hasStructuredSnippets: boolean;
     campaignsWithLessThanFourExtensions: number;
+    // Yeni eklenen alanlar
+    extensions: Record<string, boolean>;
+    score: number;
+    missingRequired: boolean;
+    missingRequiredList: string[];
   };
   landingPageQuality?: {
     brokenUrls: number;
     redirectUrls: number;
+    // Yeni eklenen alanlar
+    score: number;
+    totalPages: number;
+    mobileResponsive: boolean;
+    pageSpeed: string;
+    hasForms: boolean;
+    ctaQuality: string;
+    improvementAreas: string[];
   };
   rawData?: any; // Teknik veriler için
 }
@@ -1236,7 +1282,7 @@ const GoogleAdsDetailModule: React.FC<{ data: AdsCheck }> = ({ data }) => {
       {/* 1. Kampanya Türleri ve Performansı */}
       {data.campaignTypes && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Kampanya Türleri ve Performansı</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">1. Kampanya Türleri ve Performansı</h3>
           
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-gray-50 p-3 rounded-md text-center">
@@ -1275,7 +1321,7 @@ const GoogleAdsDetailModule: React.FC<{ data: AdsCheck }> = ({ data }) => {
       {/* 2. Kampanya İsimlendirme */}
       {data.campaignNaming && (
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Kampanya İsimlendirme</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">2. Kampanya İsimlendirme</h3>
           
           <div className="flex items-center justify-between mb-4">
             <p className="text-sm text-gray-600">İsimlendirme tutarlılığı</p>
@@ -1288,6 +1334,21 @@ const GoogleAdsDetailModule: React.FC<{ data: AdsCheck }> = ({ data }) => {
                 <ExclamationTriangleIcon className="h-4 w-4 mr-1" /> Tutarsız
               </span>
             )}
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">Case Sensitivity</p>
+              <p className="text-sm font-medium">{data.campaignNaming.consistent ? 'Uyumlu' : 'Karışık Kullanım'}</p>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">Underscore Kullanımı</p>
+              <p className="text-sm font-medium">{data.campaignNaming.consistent ? 'Tutarlı' : 'Karışık Kullanım'}</p>
+            </div>
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">Keyword Yapısı</p>
+              <p className="text-sm font-medium">{data.campaignNaming.consistent ? 'Tutarlı' : 'Karışık Kullanım'}</p>
+            </div>
           </div>
           
           {!data.campaignNaming.consistent && data.campaignNaming.issues.length > 0 && (
@@ -1303,7 +1364,601 @@ const GoogleAdsDetailModule: React.FC<{ data: AdsCheck }> = ({ data }) => {
         </div>
       )}
 
-      {/* Diğer Google Ads modülleri burada... */}
+      {/* 3. Hesap Ayarları */}
+      {data.accountSettings && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">3. Hesap Ayarları</h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.accountSettings.autoTagging ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Auto-Tagging</p>
+                <p className="text-xs text-gray-500">{data.accountSettings.autoTagging ? 'Aktif' : 'Pasif'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.accountSettings.enhancedConversions ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Enhanced Conversions</p>
+                <p className="text-xs text-gray-500">{data.accountSettings.enhancedConversions ? 'Aktif' : 'Pasif'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.accountSettings.leadFormTerms ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Lead Form Terms</p>
+                <p className="text-xs text-gray-500">{data.accountSettings.leadFormTerms ? 'Kabul Edilmiş' : 'Eksik'}</p>
+              </div>
+            </div>
+          </div>
+          
+          {!data.accountSettings.autoTagging && (
+            <div className="mt-4 bg-error-50 border-l-4 border-error-500 p-3">
+              <p className="text-sm text-error-700">Auto-tagging aktif değil. Bu ayar, kampanyaların doğru ölçümlenmesi için kritik öneme sahiptir.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 4. Auto-Apply Recommendations */}
+      {data.autoApplyRecommendations && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">4. Auto-Apply Recommendations</h3>
+          
+          <div className="flex items-center mb-4">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-xl font-bold text-gray-700">
+              {data.autoApplyRecommendations.count}
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium">Aktif Otomatik Öneri</p>
+              <p className="text-xs text-gray-500">
+                {data.autoApplyRecommendations.isExcessive 
+                  ? 'Çok fazla otomatik öneri aktif, gözden geçirin' 
+                  : 'Makul sayıda otomatik öneri'}
+              </p>
+            </div>
+          </div>
+          
+          {data.autoApplyRecommendations.isExcessive && (
+            <div className="bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                Kontrolsüz otomatik öneriler verimsizliğe yol açabilir. Hangi önerilerin otomatik uygulanacağını dikkatle seçin.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* 5. Exclusion List'ler */}
+      {data.exclusionLists && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">5. Exclusion List'ler</h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.exclusionLists.ip ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">IP Listeleri</p>
+                <p className="text-xs text-gray-500">{data.exclusionLists.ip ? 'Aktif' : 'Pasif'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.exclusionLists.apps ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Uygulama Listeleri</p>
+                <p className="text-xs text-gray-500">{data.exclusionLists.apps ? 'Aktif' : 'Pasif'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.exclusionLists.placements ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Placement Listeleri</p>
+                <p className="text-xs text-gray-500">{data.exclusionLists.placements ? 'Aktif' : 'Pasif'}</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center p-3 bg-gray-50 rounded-md">
+              <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.exclusionLists.negativeKeywords ? 'bg-success-500' : 'bg-error-500'}`}></div>
+              <div className="ml-3">
+                <p className="text-sm font-medium">Negatif Kelimeler</p>
+                <p className="text-xs text-gray-500">{data.exclusionLists.negativeKeywords ? 'Aktif' : 'Pasif'}</p>
+              </div>
+            </div>
+          </div>
+          
+          {!data.exclusionLists.ip || !data.exclusionLists.apps || !data.exclusionLists.placements || !data.exclusionLists.negativeKeywords ? (
+            <div className="mt-4 bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                Eksik dışlama listeleri tespit edildi. Kampanya bütçesinin daha verimli kullanılması için eksik dışlama listelerini eklemeniz önerilir.
+              </p>
+            </div>
+          ) : null}
+        </div>
+      )}
+      
+      {/* 6. Dönüşüm Ayarları */}
+      {data.conversionSettings && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">6. Dönüşüm Ayarları</h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5">
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Toplam Dönüşüm</p>
+              <p className="text-xl font-bold text-gray-700">{data.conversionSettings.total}</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Primary Dönüşüm</p>
+              <p className={`text-xl font-bold ${data.conversionSettings.primary <= 2 ? 'text-success-600' : 'text-error-600'}`}>
+                {data.conversionSettings.primary}
+              </p>
+              <p className="text-xs text-gray-500">(Önerilen: 1-2)</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Funnel Uyumluluğu</p>
+              <p className={`text-sm font-medium ${data.conversionSettings.funnelComplete ? 'text-success-600' : 'text-error-600'}`}>
+                {data.conversionSettings.funnelComplete ? 'Eksiksiz' : 'Eksik'}
+              </p>
+            </div>
+          </div>
+          
+          <h4 className="text-md font-medium text-gray-700 mb-3">Kaynaklara Göre Dağılım</h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+            <div className="bg-gray-50 p-2 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Web</p>
+              <p className="text-lg font-medium">{data.conversionSettings.sources.web}</p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Analytics</p>
+              <p className="text-lg font-medium">{data.conversionSettings.sources.analytics}</p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">App</p>
+              <p className="text-lg font-medium">{data.conversionSettings.sources.app}</p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Call</p>
+              <p className="text-lg font-medium">{data.conversionSettings.sources.call}</p>
+            </div>
+            <div className="bg-gray-50 p-2 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Diğer</p>
+              <p className="text-lg font-medium">{data.conversionSettings.sources.other}</p>
+            </div>
+          </div>
+          
+          {!data.conversionSettings.funnelComplete && (
+            <div className="mt-4 bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                TOFU, MOFU, BOFU olayları eksiksiz değil. Pazarlama hunisinin tüm aşamalarını ölçümlemek için eksik olan olayları tanımlayın.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+      
+      {/* 7. Attribution Modeli */}
+      {data.attributionModel && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">7. Attribution Modeli</h3>
+          
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-sm font-medium">Kullanılan Model</p>
+              <p className="text-md font-bold text-gray-700">{data.attributionModel.name}</p>
+            </div>
+            
+            <div className={`px-3 py-1 rounded-full text-sm ${
+              data.attributionModel.compatibleWithGA4 
+                ? 'bg-success-100 text-success-800' 
+                : 'bg-error-100 text-error-800'
+            }`}>
+              {data.attributionModel.compatibleWithGA4 
+                ? 'GA4 ile uyumlu' 
+                : 'GA4 ile uyumsuz'}
+            </div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded-md">
+            <div className="flex items-center mb-2">
+              <p className="text-sm font-medium">Geçiş Önerisi</p>
+              {data.attributionModel.shouldUpgrade && (
+                <span className="bg-warning-100 text-warning-800 text-xs px-2 py-0.5 ml-2 rounded-full">
+                  Güncelleme Önerisi
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-gray-600">
+              {data.attributionModel.recommendation || 'Mevcut attribution modeli ihtiyaçlarınıza uygun görünüyor.'}
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* 8. Anahtar Kelime Kalitesi */}
+      {data.keywordQuality && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">8. Anahtar Kelime Kalitesi</h3>
+          
+          <div className="grid grid-cols-3 gap-4 mb-5">
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Toplam Anahtar Kelime</p>
+              <p className="text-xl font-bold text-gray-700">{data.keywordQuality.total}</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Ortalama Kalite Skoru</p>
+              <p className={`text-xl font-bold ${
+                data.keywordQuality.avgQualityScore >= 7 
+                  ? 'text-success-600' 
+                  : data.keywordQuality.avgQualityScore >= 5 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.keywordQuality.avgQualityScore}/10
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Düşük Kaliteli Kelimeler</p>
+              <p className={`text-xl font-bold ${
+                data.keywordQuality.lowQualityPercentage <= 10 
+                  ? 'text-success-600' 
+                  : data.keywordQuality.lowQualityPercentage <= 25 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                %{data.keywordQuality.lowQualityPercentage}
+              </p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-3 gap-4 text-center">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Expected CTR</p>
+              <p className={`text-sm font-medium ${
+                data.keywordQuality.expectedCTR === 'İyi' 
+                  ? 'text-success-600' 
+                  : data.keywordQuality.expectedCTR === 'Orta' 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.keywordQuality.expectedCTR}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Ad Relevance</p>
+              <p className={`text-sm font-medium ${
+                data.keywordQuality.adRelevance === 'İyi' 
+                  ? 'text-success-600' 
+                  : data.keywordQuality.adRelevance === 'Orta' 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.keywordQuality.adRelevance}
+              </p>
+            </div>
+            
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Landing Page Experience</p>
+              <p className={`text-sm font-medium ${
+                data.keywordQuality.landingPageExp === 'İyi' 
+                  ? 'text-success-600' 
+                  : data.keywordQuality.landingPageExp === 'Orta' 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.keywordQuality.landingPageExp}
+              </p>
+            </div>
+          </div>
+          
+          {data.keywordQuality.lowQualityPercentage > 25 && (
+            <div className="mt-4 bg-error-50 border-l-4 border-error-500 p-3">
+              <p className="text-sm text-error-700">
+                Düşük kaliteli anahtar kelime oranınız çok yüksek. Bu durum, reklam maliyetlerinizi artırırken tıklama oranını düşürüyor olabilir.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 9. Arama Terimi Performansı */}
+      {data.searchTermPerformance && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">9. Arama Terimi Performansı</h3>
+          
+          <div className="grid grid-cols-3 gap-4 mb-5">
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Toplam Gösterilen Terim</p>
+              <p className="text-xl font-bold text-gray-700">{data.searchTermPerformance.totalTerms}</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Ortalama CTR</p>
+              <p className={`text-xl font-bold ${
+                data.searchTermPerformance.avgCTR >= 3 
+                  ? 'text-success-600' 
+                  : data.searchTermPerformance.avgCTR >= 1.5 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                %{data.searchTermPerformance.avgCTR}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Negatif Eklenen</p>
+              <p className="text-xl font-bold text-gray-700">{data.searchTermPerformance.negativeAdded}</p>
+            </div>
+          </div>
+          
+          <div className="mt-4">
+            <h4 className="text-md font-medium text-gray-700 mb-3">Arama Terimi Kategorileri</h4>
+            <div className="grid grid-cols-2 gap-4">
+              {data.searchTermPerformance.categories.map((category, idx) => (
+                <div key={idx} className="flex items-center bg-gray-50 p-3 rounded-md">
+                  <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-medium">
+                    {category.percentage}%
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm font-medium">{category.name}</p>
+                    <p className="text-xs text-gray-500">
+                      {category.relevance === 'Yüksek' 
+                        ? 'Yüksek ilişkili' 
+                        : category.relevance === 'Orta' 
+                          ? 'Orta ilişkili' 
+                          : 'Düşük ilişkili'}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+          
+          {data.searchTermPerformance.irrelevantPercentage > 25 && (
+            <div className="mt-4 bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                İlgisiz arama terimlerinin oranı çok yüksek (%{data.searchTermPerformance.irrelevantPercentage}). 
+                Daha fazla negatif anahtar kelime ekleyerek bu oranı düşürmeniz önerilir.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 10. Reklam Varlığı ve Kalitesi */}
+      {data.adPresenceQuality && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">10. Reklam Varlığı ve Kalitesi</h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Grup Başına Ortalama</p>
+              <p className={`text-xl font-bold ${
+                data.adPresenceQuality.avgPerGroup >= 3 
+                  ? 'text-success-600' 
+                  : 'text-error-600'
+              }`}>
+                {data.adPresenceQuality.avgPerGroup}
+              </p>
+              <p className="text-xs text-gray-500">(En az 3 önerilir)</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Responsive Ads</p>
+              <p className={`text-xl font-bold ${
+                data.adPresenceQuality.responsivePercentage >= 80 
+                  ? 'text-success-600' 
+                  : data.adPresenceQuality.responsivePercentage >= 50 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                %{data.adPresenceQuality.responsivePercentage}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Ad Strength</p>
+              <p className={`text-xl font-bold ${
+                data.adPresenceQuality.adStrength === 'Excellent' || data.adPresenceQuality.adStrength === 'Good'
+                  ? 'text-success-600' 
+                  : data.adPresenceQuality.adStrength === 'Average' 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.adPresenceQuality.adStrength}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md text-center">
+              <p className="text-xs text-gray-500 mb-1">Ad Testing</p>
+              <p className={`text-xl font-bold ${
+                data.adPresenceQuality.isTestingEnabled ? 'text-success-600' : 'text-error-600'
+              }`}>
+                {data.adPresenceQuality.isTestingEnabled ? 'Aktif' : 'Pasif'}
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded-md">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Reklam Tür Dağılımı</h4>
+            <div className="grid grid-cols-4 gap-3 text-center">
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Responsive</p>
+                <p className="text-sm font-medium">{data.adPresenceQuality.adTypeDistribution.responsive}%</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Expanded</p>
+                <p className="text-sm font-medium">{data.adPresenceQuality.adTypeDistribution.expanded}%</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Call-Only</p>
+                <p className="text-sm font-medium">{data.adPresenceQuality.adTypeDistribution.callOnly}%</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Diğer</p>
+                <p className="text-sm font-medium">{data.adPresenceQuality.adTypeDistribution.other}%</p>
+              </div>
+            </div>
+          </div>
+          
+          {(data.adPresenceQuality.avgPerGroup < 3 || data.adPresenceQuality.responsivePercentage < 50) && (
+            <div className="mt-4 bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700">
+                {data.adPresenceQuality.avgPerGroup < 3 && 'Her ad group için en az 3 reklam olması önerilir. '}
+                {data.adPresenceQuality.responsivePercentage < 50 && 'Responsive reklam oranınızı artırmanız tavsiye edilir. '}
+                Reklamlarınızın performansını artırmak için bu alanları iyileştirin.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 11. Reklam Uzantıları */}
+      {data.adExtensions && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">11. Reklam Uzantıları</h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mb-4">
+            {Object.entries(data.adExtensions.extensions).map(([key, value]) => (
+              <div key={key} className="flex flex-col items-center p-3 bg-gray-50 rounded-md">
+                <div className={`h-5 w-5 rounded-full mb-2 ${value ? 'bg-success-500' : 'bg-error-500'}`}></div>
+                <p className="text-sm font-medium text-center">{key}</p>
+                <p className="text-xs text-gray-500">{value ? 'Aktif' : 'Eksik'}</p>
+              </div>
+            ))}
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded-md flex items-center">
+            <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold">
+              {data.adExtensions.score}/10
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">Uzantı Skoru</p>
+              <p className="text-xs text-gray-500">
+                {data.adExtensions.score >= 8 
+                  ? 'Mükemmel uzantı kullanımı!' 
+                  : data.adExtensions.score >= 5 
+                    ? 'İyi, ancak geliştirilebilir' 
+                    : 'Eksik uzantı kullanımı'}
+              </p>
+            </div>
+          </div>
+          
+          {data.adExtensions.missingRequired && (
+            <div className="mt-4 bg-warning-50 border-l-4 border-warning-500 p-3">
+              <p className="text-sm text-warning-700 font-medium mb-2">Kritik eksik uzantılar:</p>
+              <ul className="list-disc list-inside text-sm text-warning-700">
+                {data.adExtensions.missingRequiredList.map((ext, idx) => (
+                  <li key={idx}>{ext}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 12. Landing Page Kalitesi */}
+      {data.landingPageQuality && (
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+          <h3 className="text-lg font-medium text-gray-900 mb-4">12. Landing Page Kalitesi</h3>
+          
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center">
+              <div className={`w-16 h-16 flex-shrink-0 rounded-full flex items-center justify-center text-white text-xl font-bold ${
+                data.landingPageQuality.score >= 80 
+                  ? 'bg-success-500' 
+                  : data.landingPageQuality.score >= 60 
+                    ? 'bg-warning-500' 
+                    : 'bg-error-500'
+              }`}>
+                {data.landingPageQuality.score}
+              </div>
+              <div className="ml-4">
+                <p className="text-sm font-medium">Sayfa Kalite Skoru</p>
+                <p className="text-xs text-gray-500">
+                  {data.landingPageQuality.score >= 80 
+                    ? 'Yüksek kaliteli sayfalar' 
+                    : data.landingPageQuality.score >= 60 
+                      ? 'Orta kaliteli sayfalar' 
+                      : 'Düşük kaliteli sayfalar'}
+                </p>
+              </div>
+            </div>
+            
+            <div className="text-right">
+              <p className="text-sm font-medium">Toplam Landing Page</p>
+              <p className="text-xl font-bold text-gray-700">{data.landingPageQuality.totalPages}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-5">
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">Mobil Uyumlu</p>
+              <p className="text-sm font-medium">{data.landingPageQuality.mobileResponsive ? 'Evet' : 'Hayır'}</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">Sayfa Hızı</p>
+              <p className={`text-sm font-medium ${
+                data.landingPageQuality.pageSpeed === 'Hızlı' 
+                  ? 'text-success-600' 
+                  : data.landingPageQuality.pageSpeed === 'Orta' 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.landingPageQuality.pageSpeed}
+              </p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">Form Var Mı</p>
+              <p className="text-sm font-medium">{data.landingPageQuality.hasForms ? 'Evet' : 'Hayır'}</p>
+            </div>
+            
+            <div className="bg-gray-50 p-3 rounded-md">
+              <p className="text-xs text-gray-500 mb-1">CTA Kalitesi</p>
+              <p className={`text-sm font-medium ${
+                data.landingPageQuality.ctaQuality === 'İyi' 
+                  ? 'text-success-600' 
+                  : data.landingPageQuality.ctaQuality === 'Orta' 
+                    ? 'text-warning-600' 
+                    : 'text-error-600'
+              }`}>
+                {data.landingPageQuality.ctaQuality}
+              </p>
+            </div>
+          </div>
+          
+          <div className="bg-gray-50 p-3 rounded-md">
+            <h4 className="text-sm font-medium text-gray-700 mb-2">Önemli İyileştirme Alanları</h4>
+            {data.landingPageQuality.improvementAreas.length > 0 ? (
+              <ul className="list-disc list-inside text-sm text-gray-700">
+                {data.landingPageQuality.improvementAreas.map((area, idx) => (
+                  <li key={idx}>{area}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-600">Önemli bir iyileştirme alanı tespit edilmedi.</p>
+            )}
+          </div>
+          
+          {!data.landingPageQuality.mobileResponsive && (
+            <div className="mt-4 bg-error-50 border-l-4 border-error-500 p-3">
+              <p className="text-sm text-error-700">
+                Landing page'ler mobil uyumlu değil. Bu durum, Google Ads kalite skorunuzu ve dönüşüm oranlarınızı olumsuz etkiliyor.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
