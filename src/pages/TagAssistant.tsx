@@ -53,7 +53,7 @@ interface GA4Check {
   status: StatusType;
   issues: string[];
   recommendations: string[];
-  // Yeni GA4 denetim alanları
+  // GA4 denetim alanları
   dataStreams?: {
     web: boolean;
     ios: boolean;
@@ -175,7 +175,7 @@ interface AdsCheck {
   enhancedConversions?: boolean;
   issues: string[];
   recommendations: string[];
-  // Yeni Google Ads denetim alanları
+  // Google Ads denetim alanları
   campaignTypes?: {
     search: boolean;
     pmax: boolean;
@@ -829,7 +829,7 @@ const PlatformCard: React.FC<{
         status === 'success' ? 'bg-success-500' : 
         status === 'warning' ? 'bg-warning-500' : 
         status === 'error' ? 'bg-error-500' : 'bg-gray-300'
-      }`}></div>
+      }`></div>
       
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
@@ -1027,6 +1027,105 @@ const EventDetailsCard: React.FC<{
   );
 };
 
+// Google Ads detay analizi bileşeni
+const GoogleAdsDetailAnalysis: React.FC<{ data: AdsCheck }> = ({ data }) => {
+  return (
+    <div className="space-y-8">
+      {/* 1. Kampanya Türleri ve Performansı */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Kampanya Türleri ve Performansı</h3>
+        
+        <div className="grid grid-cols-3 gap-4 mb-4">
+          {data.campaignTypes && (
+            <>
+              <div className="bg-gray-50 p-3 rounded-md text-center">
+                <p className="text-xs text-gray-500 mb-1">Search</p>
+                <p className={`text-sm font-medium ${data.campaignTypes.search ? 'text-success-600' : 'text-gray-400'}`}>
+                  {data.campaignTypes.search ? 'Aktif' : 'Pasif'}
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 p-3 rounded-md text-center">
+                <p className="text-xs text-gray-500 mb-1">PMax</p>
+                <p className={`text-sm font-medium ${data.campaignTypes.pmax ? 'text-success-600' : 'text-gray-400'}`}>
+                  {data.campaignTypes.pmax ? 'Aktif' : 'Pasif'}
+                </p>
+              </div>
+              
+              <div className="bg-gray-50 p-3 rounded-md text-center">
+                <p className="text-xs text-gray-500 mb-1">Display</p>
+                <p className={`text-sm font-medium ${data.campaignTypes.display ? 'text-success-600' : 'text-gray-400'}`}>
+                  {data.campaignTypes.display ? 'Aktif' : 'Pasif'}
+                </p>
+              </div>
+            </>
+          )}
+        </div>
+        
+        {data.campaignTypes?.missingTypes && data.campaignTypes.missingTypes.length > 0 && (
+          <div className="bg-warning-50 border-l-4 border-warning-500 p-3">
+            <p className="text-sm text-warning-700">
+              <span className="font-medium">Eksik kampanya türleri: </span>
+              {data.campaignTypes.missingTypes.join(', ')}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Diğer modüller (kampanya isimlendirme, hesap ayarları, vb) burada eklenebilir */}
+    </div>
+  );
+};
+
+// Meta detay analizi bileşeni
+const MetaDetailAnalysis: React.FC<{ data: MetaCheck }> = ({ data }) => {
+  return (
+    <div className="space-y-8">
+      {/* Meta Pixel Temel Bilgiler */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Meta Pixel Temel Bilgiler</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center p-3 bg-gray-50 rounded-md">
+            <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.pixelDetected ? 'bg-success-500' : 'bg-error-500'}`}></div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">Meta Pixel</p>
+              <p className="text-xs text-gray-500">{data.pixelDetected ? 'Tespit Edildi' : 'Bulunamadı'}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center p-3 bg-gray-50 rounded-md">
+            <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.conversionAPI ? 'bg-success-500' : 'bg-error-500'}`}></div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">Conversion API</p>
+              <p className="text-xs text-gray-500">{data.conversionAPI ? 'Aktif' : 'Pasif'}</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center p-3 bg-gray-50 rounded-md">
+            <div className={`h-5 w-5 flex-shrink-0 rounded-full ${data.advancedMatching ? 'bg-success-500' : 'bg-error-500'}`}></div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">Advanced Matching</p>
+              <p className="text-xs text-gray-500">{data.advancedMatching ? 'Aktif' : 'Pasif'}</p>
+            </div>
+          </div>
+        </div>
+        
+        {data.pixelId && (
+          <div className="mt-4 bg-primary-50 p-3 rounded-md">
+            <p className="text-sm text-primary-700">
+              <span className="font-medium">Pixel ID: </span>
+              {data.pixelId}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Diğer Meta analiz modülleri burada eklenebilir */}
+    </div>
+  );
+};
+
 // Platform Detay Görünümü
 const PlatformDetailsView: React.FC<{
   platformName: string;
@@ -1154,7 +1253,6 @@ const PlatformDetailsView: React.FC<{
         </div>
       );
     }
-    
     return null;
   };
   
